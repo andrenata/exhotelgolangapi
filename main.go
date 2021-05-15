@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cager/auth"
 	"cager/handler"
 	"cager/user"
 	"log"
@@ -21,7 +22,20 @@ func main() {
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
 
-	userHandler := handler.NewUserHandler(userService)
+	authService := auth.NewService()
+
+	userHandler := handler.NewUserHandler(userService, authService)
+
+	//tes token
+	// token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.zCGBEiC4n4X5jij4lK4nSEtrbebYxELZ6OfBwdm6CJg")
+	// if err != nil {
+	// 	fmt.Println("Error")
+	// }
+	// if token.Valid {
+	// 	fmt.Println("VALID")
+	// } else {
+	// 	fmt.Println("Invalid TOken")
+	//}
 
 	//test service
 	// input := user.LoginInput{
