@@ -23,9 +23,21 @@ func main() {
 
 	userHandler := handler.NewUserHandler(userService)
 
+	//test service
+	// input := user.LoginInput{
+	// 	Email:    "com.andre@bla.com",
+	// 	Password: "password",
+	// }
+	// user, err := userService.Login(input)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+	// fmt.Println(user.Name)
+
 	router := gin.Default()
 	api := router.Group("/api/v1")
-	api.POST("users", userHandler.RegisterUser)
+	api.POST("/users", userHandler.RegisterUser)
+	api.POST("/sessions", userHandler.Login)
 	router.Run()
 
 	// TEST INPUT
