@@ -3,6 +3,7 @@ package handler
 import (
 	"cager/helper"
 	"cager/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -82,4 +83,90 @@ func (h *userHandler) Login(c *gin.Context) {
 	formatter := user.FormatUser(loggedinUser, "tokentokentoken")
 	response := helper.APIResponse("Login success", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) ChekEmailAvailability(c *gin.Context) {
+	// input email dari user
+	// input email di mapping ke struct
+	// struct input di passing ke service
+	// service akan manggil repository
+	// repository akan melakukan query ke database
+	var input user.CheckEmailInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Check email failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	isEmailAvailable, err := h.userService.IsEmailAvailable(input)
+	if err != nil {
+		errorMessage := gin.H{"errors": "Server error"}
+		response := helper.APIResponse("Check email failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_available": isEmailAvailable,
+	}
+
+	metaMessage := "Email has been registered"
+	metaStatus := "error"
+
+	if isEmailAvailable {
+		metaMessage = "Email is available"
+		metaStatus = "success"
+	}
+
+	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+	// input data from user
+	// simpan gambarnya di gambar "/images"
+	// di service kita panggil repo
+	// JWT (sementara hardcode, seakan akan user id = 1)
+	// repo ambil data user = 1
+	// repo update data user simpan lokasi file
+	// c.SaveUploadedFile(file, )
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload avatar", http.StatusUnprocessableEntity, "error", data)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// get from jwt
+	userId := 1
+
+	// path := "images/" + file.Filename
+	path := fmt.Sprintf("images/%d-%s", userId, file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload avatar", http.StatusUnprocessableEntity, "error", data)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	_, err = h.userService.SaveAvatar(userId, path)
+
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Avatar uploaded", http.StatusUnprocessableEntity, "error", data)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true}
+	response := helper.APIResponse("Avatar uploaded", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
+
 }
