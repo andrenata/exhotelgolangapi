@@ -3,9 +3,13 @@ package main
 import (
 	"cager/auth"
 	"cager/handler"
+	"cager/helper"
 	"cager/user"
 	"log"
+	"net/http"
+	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -53,7 +57,7 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email-checkers", userHandler.ChekEmailAvailability)
-	api.POST("/avatars", userHandler.UploadAvatar)
+	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 	router.Run()
 
 	// TEST INPUT
@@ -74,25 +78,61 @@ func main() {
 	// userRepository.Save(user)
 }
 
-// func handler(c *gin.Context) {
-// 	dsn := "host=localhost user=postgres password=andre dbname=koolick port=5432 sslmode=disable TimeZone=Asia/Shanghai"
-// 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
-// 	if err != nil {
-// 		log.Fatal(err.Error())
-// 	}
-
-// 	var users []user.User
-// 	db.Find(&users)
-
-//c.JSON(200, users)
-// 	c.JSON(http.StatusOK, users)
-
-// }
-
 // LAYERING on GIN GOLANG
 // input data dari user
 // handler mapping input to stract
 // service mapping stract to struct user
 // responsitory save struct to db
 // db
+
+//MIDDLEWARE
+//Ambil nilai header Authorization : Bearer tokentoken
+//ambil nilai token saja
+//validasi token
+//kita ambil user_id
+//Find user by id di database melalui service
+//set context isinya user
+
+func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+
+		if !strings.Contains(authHeader, "Bearer") {
+			response := helper.APIResponse("Unauthorization", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		tokenString := ""
+		arrayToken := strings.Split(authHeader, " ")
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
+
+		token, err := authService.ValidateToken(tokenString)
+		if err != nil {
+			response := helper.APIResponse("Unauthorization", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		claim, ok := token.Claims.(jwt.MapClaims)
+
+		if !ok || !token.Valid {
+			response := helper.APIResponse("Unauthorization", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		userId := int(claim["user_id"].(float64))
+
+		user, err := userService.GetUserbyId(userId)
+		if err != nil {
+			response := helper.APIResponse("Unauthorization", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		c.Set("currentUser", user)
+	}
+}
