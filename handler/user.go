@@ -187,3 +187,29 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 
 }
+
+func (h *userHandler) ChangeName(c *gin.Context) {
+	var input user.ChangeNameInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change name failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	// get from jwt
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	_, err = h.userService.ServiceChangeName(userId, input)
+	if err != nil {
+		response := helper.APIResponse("Change name failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	response := helper.APIResponse("Changed name success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}

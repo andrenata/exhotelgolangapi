@@ -12,6 +12,7 @@ type Service interface {
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
 	SaveAvatar(id int, fileLocation string) (User, error)
 	GetUserbyId(id int) (User, error)
+	ServiceChangeName(id int, input ChangeNameInput) (User, error)
 }
 
 type service struct {
@@ -26,6 +27,9 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user := User{}
 	user.Name = input.Name
 	user.Email = input.Email
+	user.TypeVerified = 0
+	user.IsVerified = 0
+	user.IsActive = 0
 	user.PhoneNumber = input.PhoneNumber
 	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	if err != nil {
@@ -112,4 +116,20 @@ func (s *service) GetUserbyId(id int) (User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *service) ServiceChangeName(id int, input ChangeNameInput) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+
+	user.Name = input.Name
+	updatedName, err := s.repository.Update(user)
+	if err != nil {
+		return updatedName, err
+	}
+
+	return updatedName, nil
+
 }
