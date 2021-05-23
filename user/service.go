@@ -13,6 +13,8 @@ type Service interface {
 	SaveAvatar(id int, fileLocation string) (User, error)
 	GetUserbyId(id int) (User, error)
 	ServiceChangeName(id int, input ChangeNameInput) (User, error)
+	ServiceCheckPin(id int, input CheckPin) (bool, error)
+	ServiceChangePin(id int, input ChangePin) (User, error)
 }
 
 type service struct {
@@ -131,5 +133,46 @@ func (s *service) ServiceChangeName(id int, input ChangeNameInput) (User, error)
 	}
 
 	return updatedName, nil
+
+}
+
+func (s *service) ServiceChangePin(id int, input ChangePin) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+
+	Pin, err := bcrypt.GenerateFromPassword([]byte(input.Pin), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
+
+	user.Pin = string(Pin)
+	updatePin, err := s.repository.Update(user)
+	if err != nil {
+		return updatePin, err
+	}
+
+	return updatePin, nil
+
+}
+
+func (s *service) ServiceCheckPin(id int, input CheckPin) (bool, error) {
+
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return false, err
+	}
+
+	if user.ID == 0 {
+		return false, nil
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Pin), []byte(input.Pin))
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
 
 }

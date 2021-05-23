@@ -7,6 +7,7 @@ type Repository interface {
 	FindByEmail(email string) (User, error)
 	FindById(id int) (User, error)
 	Update(user User) (User, error)
+	// CheckPin(id int, pin string) (User, error)
 }
 
 type repository struct {
@@ -59,3 +60,13 @@ func (r *repository) Update(user User) (User, error) {
 
 	return user, nil
 }
+
+// func (r *repository) CheckPin(id int, pin string) (User, error) {
+// 	var user User
+
+// 	err := r.db.Where("id = ? AND pin = ?", id, pin).Find(&user).Error
+// 	if err != nil {
+// 		return user, err
+// 	}
+// 	return user, nil
+// }

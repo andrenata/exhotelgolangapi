@@ -19,3 +19,11 @@ type CheckEmailInput struct {
 type ChangeNameInput struct {
 	Name string `json:"name" binding:"required"`
 }
+
+type ChangePin struct {
+	Pin string `json:"pin" binding:"required"`
+}
+
+type CheckPin struct {
+	Pin string `json:"pin" binding:"required"`
+}

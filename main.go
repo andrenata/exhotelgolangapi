@@ -59,6 +59,8 @@ func main() {
 	api.POST("/email-checkers", userHandler.ChekEmailAvailability)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.POST("/change-name", authMiddleware(authService, userService), userHandler.ChangeName)
+	api.POST("/check-pin", authMiddleware(authService, userService), userHandler.HandlerCheckPin)
+	api.POST("/change-pin", authMiddleware(authService, userService), userHandler.HandlerChangePin)
 	router.Run()
 
 	// TEST INPUT

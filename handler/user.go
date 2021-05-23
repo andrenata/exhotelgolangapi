@@ -188,6 +188,35 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 
 }
 
+func (h *userHandler) HandlerChangePin(c *gin.Context) {
+	var input user.ChangePin
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("PIN updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	_, err = h.userService.ServiceChangePin(userId, input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("PIN Updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{"is_updated": true}
+	response := helper.APIResponse("PIN updated", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
+
+}
+
 func (h *userHandler) ChangeName(c *gin.Context) {
 	var input user.ChangeNameInput
 	err := c.ShouldBindJSON(&input)
@@ -212,4 +241,41 @@ func (h *userHandler) ChangeName(c *gin.Context) {
 	response := helper.APIResponse("Changed name success", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
 
+}
+
+func (h *userHandler) HandlerCheckPin(c *gin.Context) {
+	var input user.CheckPin
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("PIN failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	isCheckPin, err := h.userService.ServiceCheckPin(userId, input)
+	if err != nil {
+		response := helper.APIResponse("Server Error", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_true": isCheckPin,
+	}
+
+	metaMessage := "Check is different"
+	metaStatus := "error"
+
+	if isCheckPin {
+		metaMessage = "PIN success"
+		metaStatus = "success"
+	}
+
+	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
+	c.JSON(http.StatusOK, response)
 }
