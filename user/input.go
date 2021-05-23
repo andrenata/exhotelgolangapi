@@ -27,3 +27,7 @@ type ChangePin struct {
 type CheckPin struct {
 	Pin string `json:"pin" binding:"required"`
 }
+
+type InputChangeNumber struct {
+	PhoneNumber string `json:"phonenumber" binding:"required"`
+}

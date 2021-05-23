@@ -15,6 +15,7 @@ type Service interface {
 	ServiceChangeName(id int, input ChangeNameInput) (User, error)
 	ServiceCheckPin(id int, input CheckPin) (bool, error)
 	ServiceChangePin(id int, input ChangePin) (User, error)
+	ServiceChangePhoneNumber(id int, input InputChangeNumber) (User, error)
 }
 
 type service struct {
@@ -175,4 +176,18 @@ func (s *service) ServiceCheckPin(id int, input CheckPin) (bool, error) {
 
 	return true, nil
 
+}
+
+func (s *service) ServiceChangePhoneNumber(id int, input InputChangeNumber) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+
+	user.PhoneNumber = input.PhoneNumber
+	changedPhone, err := s.repository.Update(user)
+	if err != nil {
+		return changedPhone, err
+	}
+	return changedPhone, nil
 }

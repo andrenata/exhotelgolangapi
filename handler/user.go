@@ -279,3 +279,28 @@ func (h *userHandler) HandlerCheckPin(c *gin.Context) {
 	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *userHandler) HandlerChangePhoneNumber(c *gin.Context) {
+	var input user.InputChangeNumber
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change phone number failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+	_, err = h.userService.ServiceChangePhoneNumber(userId, input)
+	if err != nil {
+		response := helper.APIResponse("Change phone number failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	response := helper.APIResponse("Changed phone number success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}
