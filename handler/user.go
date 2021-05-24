@@ -304,3 +304,26 @@ func (h *userHandler) HandlerChangePhoneNumber(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 
 }
+
+func (h *userHandler) ChangeEmailHandler(c *gin.Context) {
+	var input user.ChangeEmailInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change email failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	_, err = h.userService.ChangeEmailService(userId, input)
+	if err != nil {
+		response := helper.APIResponse("Change email failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+	response := helper.APIResponse("Change email success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}

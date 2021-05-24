@@ -62,6 +62,7 @@ func main() {
 	api.POST("/check-pin", authMiddleware(authService, userService), userHandler.HandlerCheckPin)
 	api.POST("/change-pin", authMiddleware(authService, userService), userHandler.HandlerChangePin)
 	api.POST("/change-phone-number", authMiddleware(authService, userService), userHandler.HandlerChangePhoneNumber)
+	api.POST("/change-email", authMiddleware(authService, userService), userHandler.ChangeEmailHandler)
 	router.Run()
 
 	// TEST INPUT
