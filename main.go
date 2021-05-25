@@ -4,6 +4,7 @@ import (
 	"cager/auth"
 	"cager/handler"
 	"cager/helper"
+	"cager/payment"
 	"cager/user"
 	"log"
 	"net/http"
@@ -24,11 +25,15 @@ func main() {
 	}
 
 	userRepository := user.NewRepository(db)
+	paymentRepository := payment.NewRepository(db)
+
 	userService := user.NewService(userRepository)
+	paymentService := payment.NewService(paymentRepository)
 
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
+	paymentHandler := handler.NewPaymentHandler(paymentService)
 
 	//tes token
 	// token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.zCGBEiC4n4X5jij4lK4nSEtrbebYxELZ6OfBwdm6CJg")
@@ -57,6 +62,8 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email-checkers", userHandler.ChekEmailAvailability)
+	api.POST("/bank-register", paymentHandler.RegisterPayment)
+
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.POST("/change-name", authMiddleware(authService, userService), userHandler.ChangeName)
 	api.POST("/check-pin", authMiddleware(authService, userService), userHandler.HandlerCheckPin)
@@ -66,21 +73,22 @@ func main() {
 	router.Run()
 
 	// TEST INPUT
-	// userInput := user.RegisterUserInput{}
-	// userInput.Name = "Test simpan dari service"
-	// userInput.Email = "test@gmail.com"
-	// userInput.PhoneNumber = "087860062474"
-	// userInput.Password = "Password"
+	// paymentInput := payment.RegisterPaymentInput{}
+	// paymentInput.BankName = "BCA"
+	// paymentInput.BankNumber = "1234567"
+	// paymentInput.AccountName = "Andre"
+	// paymentInput.IsActive = 1
 
 	// userService.RegisterUser(userInput)
+	// paymentService.RegisterPayment(paymentInput)
 
-	// user := user.User{
-	// 	Name:     "test simpan",
-	// 	Email:    "andre@blabla.com",
-	// 	Password: "passwordtest",
+	// payment := payment.Payment{
+	// 	BankName : "BCA",
+	// 	AccountName : "Andre Nata",
+	// 	BankNumber : "1350370591",
+	// 	IsActive : 1
 	// }
-
-	// userRepository.Save(user)
+	// paymentRepository.Save(payment)
 }
 
 // LAYERING on GIN GOLANG
