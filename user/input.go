@@ -16,6 +16,10 @@ type CheckEmailInput struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+type CheckPhoneInput struct {
+	PhoneNumber string `json:"phonenumber" binding:"required"`
+}
+
 type ChangeEmailInput struct {
 	Email string `json:"email" binding:"required,email"`
 }
@@ -28,8 +32,16 @@ type ChangePin struct {
 	Pin string `json:"pin" binding:"required"`
 }
 
+type ChangePinTemporary struct {
+	PinTemporary string `json:"pin_temporary" binding:"required"`
+}
+
 type CheckPin struct {
 	Pin string `json:"pin" binding:"required"`
+}
+
+type CheckPinTemporary struct {
+	PinTemporary string `json:"pin_temporary" binding:"required"`
 }
 
 type InputChangeNumber struct {

@@ -28,11 +28,8 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-
 		errors := helper.FormatValidationError(err)
-
 		errorMessage := gin.H{"errors": errors}
-
 		response := helper.APIResponse("Register account failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 
@@ -63,12 +60,6 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 }
 
 func (h *userHandler) Login(c *gin.Context) {
-	// user input
-	// input tangkap handler
-	// mapping dari input user ke input struct
-	// input struct passing service
-	// di service mencari dgn bantuan respository user dengan email x
-	// mencocokkan password
 	var input user.LoginInput
 
 	err := c.ShouldBindJSON(&input)
@@ -134,6 +125,42 @@ func (h *userHandler) ChekEmailAvailability(c *gin.Context) {
 
 	if isEmailAvailable {
 		metaMessage = "Email is available"
+		metaStatus = "success"
+	}
+
+	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) ChekPhoneAvailability(c *gin.Context) {
+	var input user.CheckPhoneInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Input check phone failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	isPhoneAvailable, err := h.userService.IsPhoneAvailable(input)
+	if err != nil {
+		errorMessage := gin.H{"errors": "Server error"}
+		response := helper.APIResponse("Check phone failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_available": isPhoneAvailable,
+	}
+
+	metaMessage := "Phone number has been registered"
+	metaStatus := "error"
+
+	if isPhoneAvailable {
+		metaMessage = "Phone number is available"
 		metaStatus = "success"
 	}
 
@@ -217,6 +244,35 @@ func (h *userHandler) HandlerChangePin(c *gin.Context) {
 
 }
 
+func (h *userHandler) HandlerChangePinTemporary(c *gin.Context) {
+	var input user.ChangePinTemporary
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Input PIN failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	_, err = h.userService.ServiceChangePinTemporary(userId, input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("PIN Updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{"is_updated": true}
+	response := helper.APIResponse("PIN updated", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
+
+}
+
 func (h *userHandler) ChangeName(c *gin.Context) {
 	var input user.ChangeNameInput
 	err := c.ShouldBindJSON(&input)
@@ -258,6 +314,43 @@ func (h *userHandler) HandlerCheckPin(c *gin.Context) {
 	userId := currentUser.ID
 
 	isCheckPin, err := h.userService.ServiceCheckPin(userId, input)
+	if err != nil {
+		response := helper.APIResponse("Server Error", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_true": isCheckPin,
+	}
+
+	metaMessage := "Check is different"
+	metaStatus := "error"
+
+	if isCheckPin {
+		metaMessage = "PIN success"
+		metaStatus = "success"
+	}
+
+	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) HandlerCheckPinTemporary(c *gin.Context) {
+	var input user.CheckPin
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("PIN failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	isCheckPin, err := h.userService.ServiceCheckPinTemporary(userId, input)
 	if err != nil {
 		response := helper.APIResponse("Server Error", http.StatusUnprocessableEntity, "error", nil)
 		c.JSON(http.StatusUnprocessableEntity, response)
@@ -324,6 +417,18 @@ func (h *userHandler) ChangeEmailHandler(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 	}
 	response := helper.APIResponse("Change email success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) FetchUser(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	formatter := user.FormatUser(currentUser, "")
+
+	response := helper.APIResponse("Successfuly fetch user data", http.StatusOK, "success", formatter)
+
 	c.JSON(http.StatusOK, response)
 
 }

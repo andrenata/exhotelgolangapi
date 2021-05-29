@@ -17,6 +17,9 @@ type Service interface {
 	ServiceChangePin(id int, input ChangePin) (User, error)
 	ServiceChangePhoneNumber(id int, input InputChangeNumber) (User, error)
 	ChangeEmailService(id int, input ChangeEmailInput) (User, error)
+	IsPhoneAvailable(input CheckPhoneInput) (bool, error)
+	ServiceCheckPinTemporary(id int, input CheckPin) (bool, error)
+	ServiceChangePinTemporary(id int, input ChangePinTemporary) (User, error)
 }
 
 type service struct {
@@ -34,12 +37,23 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user.TypeVerified = 0
 	user.IsVerified = 0
 	user.IsActive = 0
+	user.Balance = 0
+	user.BalanceTemporary = 0
 	user.PhoneNumber = input.PhoneNumber
 	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	if err != nil {
 		return user, err
 	}
 	user.Password = string(Password)
+
+	checkPhone, err := s.repository.FindByPhone(input.PhoneNumber)
+	if err != nil {
+		return checkPhone, err
+	}
+
+	if checkPhone.ID != 0 {
+		return checkPhone, errors.New("Phone number has been registered")
+	}
 
 	newUser, err := s.repository.Save(user)
 	if err != nil {
@@ -78,6 +92,21 @@ func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	email := input.Email
 
 	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return false, err
+	}
+
+	if user.ID == 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (s *service) IsPhoneAvailable(input CheckPhoneInput) (bool, error) {
+	phone := input.PhoneNumber
+
+	user, err := s.repository.FindByPhone(phone)
 	if err != nil {
 		return false, err
 	}
@@ -159,6 +188,27 @@ func (s *service) ServiceChangePin(id int, input ChangePin) (User, error) {
 
 }
 
+func (s *service) ServiceChangePinTemporary(id int, input ChangePinTemporary) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+
+	Pin, err := bcrypt.GenerateFromPassword([]byte(input.PinTemporary), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
+
+	user.PinTemporary = string(Pin)
+	updatePin, err := s.repository.Update(user)
+	if err != nil {
+		return updatePin, err
+	}
+
+	return updatePin, nil
+
+}
+
 func (s *service) ServiceCheckPin(id int, input CheckPin) (bool, error) {
 
 	user, err := s.repository.FindById(id)
@@ -171,6 +221,26 @@ func (s *service) ServiceCheckPin(id int, input CheckPin) (bool, error) {
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Pin), []byte(input.Pin))
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
+
+}
+
+func (s *service) ServiceCheckPinTemporary(id int, input CheckPin) (bool, error) {
+
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return false, err
+	}
+
+	if user.ID == 0 {
+		return false, nil
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PinTemporary), []byte(input.Pin))
 	if err != nil {
 		return false, nil
 	}

@@ -62,12 +62,19 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email-checkers", userHandler.ChekEmailAvailability)
-	api.POST("/bank-register", paymentHandler.RegisterPayment)
+	api.POST("/phone-checkers", userHandler.ChekPhoneAvailability)
+	api.POST("/payment-register", paymentHandler.RegisterPayment)
+	api.GET("/payments", paymentHandler.Index)
 
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.POST("/change-name", authMiddleware(authService, userService), userHandler.ChangeName)
+	// api.GET("/users/fetch", authMiddleware(authService, userService), userHandler.FetchUser)
+
 	api.POST("/check-pin", authMiddleware(authService, userService), userHandler.HandlerCheckPin)
+	api.POST("/check-pin-temporary", authMiddleware(authService, userService), userHandler.HandlerCheckPinTemporary)
 	api.POST("/change-pin", authMiddleware(authService, userService), userHandler.HandlerChangePin)
+	api.POST("/change-pin-temporary", authMiddleware(authService, userService), userHandler.HandlerChangePinTemporary)
+
 	api.POST("/change-phone-number", authMiddleware(authService, userService), userHandler.HandlerChangePhoneNumber)
 	api.POST("/change-email", authMiddleware(authService, userService), userHandler.ChangeEmailHandler)
 	router.Run()

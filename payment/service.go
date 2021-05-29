@@ -2,6 +2,7 @@ package payment
 
 type Service interface {
 	RegisterPayment(input RegisterPaymentInput) (Payment, error)
+	GetAllPayment() ([]Payment, error)
 }
 
 type service struct {
@@ -26,4 +27,12 @@ func (s *service) RegisterPayment(input RegisterPaymentInput) (Payment, error) {
 
 	return newPayment, nil
 
+}
+
+func (s *service) GetAllPayment() ([]Payment, error) {
+	payments, err := s.repository.FindAll()
+	if err != nil {
+		return payments, err
+	}
+	return payments, nil
 }

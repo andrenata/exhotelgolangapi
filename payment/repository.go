@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	Save(payment Payment) (Payment, error)
+	FindAll() ([]Payment, error)
 }
 
 type repository struct {
@@ -20,4 +21,13 @@ func (r *repository) Save(payment Payment) (Payment, error) {
 		return payment, err
 	}
 	return payment, nil
+}
+
+func (r *repository) FindAll() ([]Payment, error) {
+	var payments []Payment
+	err := r.db.Find(&payments).Error
+	if err != nil {
+		return payments, err
+	}
+	return payments, nil
 }

@@ -7,6 +7,7 @@ type Repository interface {
 	FindByEmail(email string) (User, error)
 	FindById(id int) (User, error)
 	Update(user User) (User, error)
+	FindByPhone(PhoneNumber string) (User, error)
 	// CheckPin(id int, pin string) (User, error)
 }
 
@@ -31,6 +32,17 @@ func (r *repository) Save(user User) (User, error) {
 func (r *repository) FindByEmail(email string) (User, error) {
 	var user User
 	err := r.db.Where("email = ?", email).Find(&user).Error
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+
+}
+
+func (r *repository) FindByPhone(PhoneNumber string) (User, error) {
+	var user User
+	err := r.db.Where("phone_number = ?", PhoneNumber).Find(&user).Error
 	if err != nil {
 		return user, err
 	}

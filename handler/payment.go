@@ -17,6 +17,21 @@ func NewPaymentHandler(paymentService payment.Service) *paymentHandler {
 	return &paymentHandler{paymentService}
 }
 
+func (h *paymentHandler) Index(c *gin.Context) {
+	payments, err := h.paymentService.GetAllPayment()
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Payment failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		// return payments, err
+	}
+	response := helper.APIResponse("Payment registered", http.StatusOK, "success", payments)
+	c.JSON(http.StatusOK, response)
+
+	// return payments, nil
+}
+
 func (h *paymentHandler) RegisterPayment(c *gin.Context) {
 
 	var input payment.RegisterPaymentInput
