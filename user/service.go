@@ -168,17 +168,27 @@ func (s *service) ServiceChangeName(id int, input ChangeNameInput) (User, error)
 }
 
 func (s *service) ServiceChangePin(id int, input ChangePin) (User, error) {
+	newpin := input.Pin
 	user, err := s.repository.FindById(id)
 	if err != nil {
-		return user, err
+		return user, nil
+	}
+	if user.ID == 0 {
+		return user, errors.New("PIN is different")
 	}
 
-	Pin, err := bcrypt.GenerateFromPassword([]byte(input.Pin), bcrypt.MinCost)
+	err = bcrypt.CompareHashAndPassword([]byte(user.PinTemporary), []byte(newpin))
 	if err != nil {
 		return user, err
 	}
 
-	user.Pin = string(Pin)
+	pin, err := bcrypt.GenerateFromPassword([]byte(input.Pin), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
+
+	user.Pin = string(pin)
+	user.PinTemporary = ""
 	updatePin, err := s.repository.Update(user)
 	if err != nil {
 		return updatePin, err

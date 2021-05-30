@@ -231,11 +231,12 @@ func (h *userHandler) HandlerChangePin(c *gin.Context) {
 
 	_, err = h.userService.ServiceChangePin(userId, input)
 	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
+		// errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": err.Error()}
 		response := helper.APIResponse("PIN Updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
+
 	}
 
 	data := gin.H{"is_updated": true}
@@ -260,8 +261,7 @@ func (h *userHandler) HandlerChangePinTemporary(c *gin.Context) {
 
 	_, err = h.userService.ServiceChangePinTemporary(userId, input)
 	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
+		errorMessage := gin.H{"errors": err.Error()}
 		response := helper.APIResponse("PIN Updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
