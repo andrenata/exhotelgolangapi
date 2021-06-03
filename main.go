@@ -69,7 +69,7 @@ func main() {
 	api.POST("/phone-checkers", userHandler.ChekPhoneAvailability)
 
 	// PAYMENT
-	api.POST("/payment-register", paymentHandler.RegisterPayment)
+	api.POST("/payment-register", authMiddleware(authService, userService), paymentHandler.RegisterPayment)
 	api.GET("/payments", paymentHandler.Index)
 
 	// BALANCE

@@ -1,5 +1,7 @@
 package balance
 
+import "time"
+
 type BalanceFormatter struct {
 	ID           int                     `json:"id"`
 	UserId       int                     `json:"user_id"`
@@ -12,6 +14,7 @@ type BalanceFormatter struct {
 	Status       int                     `json:"status"`
 	User         BalanceUserFormatter    `json:"user"`
 	Payment      BalancePaymentFormatter `json:"payment"`
+	CreatedAt    time.Time               `json:"created_at"`
 }
 
 type BalanceUserFormatter struct {
@@ -36,6 +39,7 @@ func FormatBalance(balanceHistory BalanceHistory) BalanceFormatter {
 	balanceFormatter.Code = balanceHistory.Code
 	balanceFormatter.Amount = balanceHistory.Amount
 	balanceFormatter.Status = balanceHistory.Status
+	balanceFormatter.CreatedAt = balanceHistory.CreatedAt
 
 	// USER
 	user := balanceHistory.User
