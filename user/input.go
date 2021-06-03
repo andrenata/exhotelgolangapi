@@ -47,3 +47,8 @@ type CheckPinTemporary struct {
 type InputChangeNumber struct {
 	PhoneNumber string `json:"phonenumber" binding:"required"`
 }
+
+// BALANCE
+type ChangeBalanceTemp struct {
+	BalanceTemporary int `json:"balance_temporary" binding:"required"`
+}

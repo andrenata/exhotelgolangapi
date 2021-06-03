@@ -8,7 +8,6 @@ type Repository interface {
 	FindById(id int) (User, error)
 	Update(user User) (User, error)
 	FindByPhone(PhoneNumber string) (User, error)
-	// CheckPin(id int, pin string) (User, error)
 }
 
 type repository struct {

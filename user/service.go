@@ -20,6 +20,7 @@ type Service interface {
 	IsPhoneAvailable(input CheckPhoneInput) (bool, error)
 	ServiceCheckPinTemporary(id int, input CheckPin) (bool, error)
 	ServiceChangePinTemporary(id int, input ChangePinTemporary) (User, error)
+	ChangeBalanceTempService(id int, input ChangeBalanceTemp) (User, error)
 }
 
 type service struct {
@@ -285,4 +286,18 @@ func (s *service) ChangeEmailService(id int, input ChangeEmailInput) (User, erro
 		return changedEmail, err
 	}
 	return changedEmail, nil
+}
+
+// BALANCE
+func (s *service) ChangeBalanceTempService(id int, input ChangeBalanceTemp) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+	user.BalanceTemporary = input.BalanceTemporary
+	changeBalanceTemp, err := s.repository.Update(user)
+	if err != nil {
+		return changeBalanceTemp, err
+	}
+	return changeBalanceTemp, nil
 }
