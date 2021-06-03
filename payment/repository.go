@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type Repository interface {
 	Save(payment Payment) (Payment, error)
 	FindAll() ([]Payment, error)
+	FindById(id int) (Payment, error)
 }
 
 type repository struct {
@@ -30,4 +31,16 @@ func (r *repository) FindAll() ([]Payment, error) {
 		return payments, err
 	}
 	return payments, nil
+}
+
+func (r *repository) FindById(id int) (Payment, error) {
+	var payment Payment
+
+	err := r.db.Where("id = ?", id).Find(&payment).Error
+	if err != nil {
+		return payment, err
+	}
+
+	return payment, nil
+
 }

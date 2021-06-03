@@ -31,7 +31,7 @@ func main() {
 
 	userService := user.NewService(userRepository)
 	paymentService := payment.NewService(paymentRepository)
-	balanceService := balance.NewService(balanceRepository)
+	balanceService := balance.NewService(balanceRepository, userService, paymentService)
 
 	authService := auth.NewService()
 

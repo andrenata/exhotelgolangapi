@@ -1,8 +1,11 @@
 package payment
 
+import "errors"
+
 type Service interface {
 	RegisterPayment(input RegisterPaymentInput) (Payment, error)
 	GetAllPayment() ([]Payment, error)
+	GetPaymentbyId(id int) (Payment, error)
 }
 
 type service struct {
@@ -35,4 +38,17 @@ func (s *service) GetAllPayment() ([]Payment, error) {
 		return payments, err
 	}
 	return payments, nil
+}
+
+func (s *service) GetPaymentbyId(id int) (Payment, error) {
+	payment, err := s.repository.FindById(id)
+	if err != nil {
+		return payment, err
+	}
+
+	if payment.ID == 0 {
+		return payment, errors.New("Payment not found")
+	}
+
+	return payment, nil
 }
