@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	Save(balanceHistory BalanceHistory) (BalanceHistory, error)
+	FindByID(ID int) (BalanceHistory, error)
 }
 
 type repository struct {
@@ -19,5 +20,16 @@ func (r *repository) Save(balanceHistory BalanceHistory) (BalanceHistory, error)
 	if err != nil {
 		return balanceHistory, err
 	}
+	return balanceHistory, nil
+}
+
+func (r *repository) FindByID(ID int) (BalanceHistory, error) {
+	var balanceHistory BalanceHistory
+
+	err := r.db.Where("id = ?", ID).Find(&balanceHistory).Error
+	if err != nil {
+		return balanceHistory, err
+	}
+
 	return balanceHistory, nil
 }

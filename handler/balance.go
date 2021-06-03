@@ -46,3 +46,25 @@ func (h *balanceHandler) CreateBalance(c *gin.Context) {
 	response := helper.APIResponse("Success to create Top Up", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *balanceHandler) BalanceApprove(c *gin.Context) {
+	var input balance.InputTopUpApprove
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Approve Top Up Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	NewBalanceApprove, err := h.balanceService.TopUpApprove(input)
+	if err != nil {
+		response := helper.APIResponse("Approve Top Up Failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Approve Top Up Success", http.StatusOK, "success", NewBalanceApprove)
+	c.JSON(http.StatusOK, response)
+}

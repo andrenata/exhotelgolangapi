@@ -31,7 +31,7 @@ func main() {
 
 	userService := user.NewService(userRepository)
 	paymentService := payment.NewService(paymentRepository)
-	balanceService := balance.NewService(balanceRepository, userService, paymentService)
+	balanceService := balance.NewService(balanceRepository, userService, paymentService, userRepository)
 
 	authService := auth.NewService()
 
@@ -74,6 +74,7 @@ func main() {
 
 	// BALANCE
 	api.POST("/balance-topup", authMiddleware(authService, userService), balanceHandler.CreateBalance)
+	api.POST("/balance-approve", authMiddleware(authService, userService), balanceHandler.BalanceApprove)
 
 	// PROFILE
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)

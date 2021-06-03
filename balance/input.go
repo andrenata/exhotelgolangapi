@@ -12,3 +12,8 @@ type InputTopUp struct {
 	PaymentId    int    `json:"payment_id" binding:"required"`
 	User         user.User
 }
+
+type InputTopUpApprove struct {
+	ID     int    `json:"id" binding:"required"`
+	Secure string `json:"secure" binding:"required"`
+}
