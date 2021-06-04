@@ -6,6 +6,7 @@ import (
 	"cager/handler"
 	"cager/helper"
 	"cager/payment"
+	"cager/topup"
 	"cager/user"
 	"log"
 	"net/http"
@@ -28,16 +29,18 @@ func main() {
 	userRepository := user.NewRepository(db)
 	paymentRepository := payment.NewRepository(db)
 	balanceRepository := balance.NewRepository(db)
+	topupRepository := topup.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	paymentService := payment.NewService(paymentRepository)
 	balanceService := balance.NewService(balanceRepository, userService, paymentService, userRepository)
+	topupService := topup.NewService(topupRepository)
 
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	paymentHandler := handler.NewPaymentHandler(paymentService)
-	balanceHandler := handler.NewBalanceHandler(balanceService)
+	balanceHandler := handler.NewBalanceHandler(balanceService, topupService)
 
 	//tes token
 	// token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.zCGBEiC4n4X5jij4lK4nSEtrbebYxELZ6OfBwdm6CJg")
@@ -73,8 +76,9 @@ func main() {
 	api.GET("/payments", paymentHandler.Index)
 
 	// BALANCE
-	api.POST("/balance-topup", authMiddleware(authService, userService), balanceHandler.CreateBalance)
-	api.POST("/balance-approve", authMiddleware(authService, userService), balanceHandler.BalanceApprove)
+	// api.POST("/balance-topup", authMiddleware(authService, userService), balanceHandler.CreateBalance)
+	// api.POST("/balance-approve", authMiddleware(authService, userService), balanceHandler.BalanceApprove)
+	api.POST("/money-transfer", DBTransactionMiddleware(db), balanceHandler.BalanceApprove)
 
 	// PROFILE
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
@@ -164,5 +168,43 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 		}
 
 		c.Set("currentUser", user)
+	}
+}
+
+// TRX
+//StatusInList -> checks if the given status is in the list
+func StatusInList(status int, statusList []int) bool {
+	for _, i := range statusList {
+		if i == status {
+			return true
+		}
+	}
+	return false
+}
+
+// DBTransactionMiddleware : to setup the database transaction middleware
+func DBTransactionMiddleware(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		txHandle := db.Begin()
+		log.Print("beginning database transaction")
+
+		defer func() {
+			if r := recover(); r != nil {
+				txHandle.Rollback()
+			}
+		}()
+
+		c.Set("db_trx", txHandle)
+		c.Next()
+
+		if StatusInList(c.Writer.Status(), []int{http.StatusOK, http.StatusCreated}) {
+			log.Print("committing transactions")
+			if err := txHandle.Commit().Error; err != nil {
+				log.Print("trx commit error: ", err)
+			}
+		} else {
+			log.Print("rolling back transaction due to status code: ", c.Writer.Status())
+			txHandle.Rollback()
+		}
 	}
 }

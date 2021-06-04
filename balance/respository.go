@@ -1,14 +1,16 @@
 package balance
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
+
+type repository struct {
+	db *gorm.DB
+}
 
 type Repository interface {
 	Save(balanceHistory BalanceHistory) (BalanceHistory, error)
 	FindByID(ID int) (BalanceHistory, error)
-}
-
-type repository struct {
-	db *gorm.DB
 }
 
 func NewRepository(db *gorm.DB) *repository {
