@@ -313,7 +313,7 @@ func (h *userHandler) HandlerCheckPin(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(user.User)
 	userId := currentUser.ID
 
-	isCheckPin, err := h.userService.ServiceCheckPin(userId, input)
+	isCheckPin, err := h.userService.ServiceCheckPin(userId, input.Pin)
 	if err != nil {
 		response := helper.APIResponse("Server Error", http.StatusUnprocessableEntity, "error", nil)
 		c.JSON(http.StatusUnprocessableEntity, response)

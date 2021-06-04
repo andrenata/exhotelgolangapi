@@ -12,6 +12,13 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type TransferInput struct {
+	IdGiver    int    `json:"id_giver" binding:"required"`
+	IdReciever int    `json:"id_reciever" binding:"required"`
+	Amount     int    `json:"amount" binding:"required"`
+	Pin        string `json:"pin" binding:"required"`
+}
+
 type CheckEmailInput struct {
 	Email string `json:"email" binding:"required,email"`
 }

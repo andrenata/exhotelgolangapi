@@ -4,11 +4,14 @@ import (
 	"cager/payment"
 	"cager/user"
 	"math/rand"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
 	TopUpBalance(userId int, input InputTopUp) (BalanceHistory, error)
 	FindService(balanceId int) (BalanceHistory, error)
+	ServiceCheckPin(id int, pin string) (bool, error)
 }
 
 type service struct {
@@ -60,4 +63,24 @@ func (s *service) FindService(balanceId int) (BalanceHistory, error) {
 		return balanceHistory, err
 	}
 	return balanceHistory, nil
+}
+
+func (s *service) ServiceCheckPin(id int, pin string) (bool, error) {
+
+	user, err := s.userRepository.FindById(id)
+	if err != nil {
+		return false, err
+	}
+
+	if user.ID == 0 {
+		return false, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Pin), []byte(pin))
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+
 }

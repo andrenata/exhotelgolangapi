@@ -13,7 +13,7 @@ type Service interface {
 	SaveAvatar(id int, fileLocation string) (User, error)
 	GetUserbyId(id int) (User, error)
 	ServiceChangeName(id int, input ChangeNameInput) (User, error)
-	ServiceCheckPin(id int, input CheckPin) (bool, error)
+	ServiceCheckPin(id int, pin string) (bool, error)
 	ServiceChangePin(id int, input ChangePin) (User, error)
 	ServiceChangePhoneNumber(id int, input InputChangeNumber) (User, error)
 	ChangeEmailService(id int, input ChangeEmailInput) (User, error)
@@ -220,7 +220,7 @@ func (s *service) ServiceChangePinTemporary(id int, input ChangePinTemporary) (U
 
 }
 
-func (s *service) ServiceCheckPin(id int, input CheckPin) (bool, error) {
+func (s *service) ServiceCheckPin(id int, pin string) (bool, error) {
 
 	user, err := s.repository.FindById(id)
 	if err != nil {
@@ -228,12 +228,12 @@ func (s *service) ServiceCheckPin(id int, input CheckPin) (bool, error) {
 	}
 
 	if user.ID == 0 {
-		return false, nil
+		return false, errors.New("User failed")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Pin), []byte(input.Pin))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Pin), []byte(pin))
 	if err != nil {
-		return false, nil
+		return false, errors.New("PIN is different")
 	}
 
 	return true, nil

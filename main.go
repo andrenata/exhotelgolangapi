@@ -7,6 +7,7 @@ import (
 	"cager/middleware"
 	"cager/payment"
 	"cager/topup"
+	"cager/transfer"
 	"cager/user"
 	"log"
 
@@ -27,17 +28,19 @@ func main() {
 	paymentRepository := payment.NewRepository(db)
 	balanceRepository := balance.NewRepository(db)
 	topupRepository := topup.NewRepository(db)
+	transferRepository := transfer.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	paymentService := payment.NewService(paymentRepository)
 	balanceService := balance.NewService(balanceRepository, userService, paymentService, userRepository)
 	topupService := topup.NewService(topupRepository)
+	transferService := transfer.NewService(transferRepository)
 
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	paymentHandler := handler.NewPaymentHandler(paymentService)
-	balanceHandler := handler.NewBalanceHandler(balanceService, topupService)
+	balanceHandler := handler.NewBalanceHandler(balanceService, topupService, transferService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -53,6 +56,7 @@ func main() {
 	// BALANCE
 	api.POST("/balance-topup", middleware.AuthMiddleware(authService, userService), balanceHandler.CreateBalance)
 	api.POST("/topup-approve", middleware.DBApproveBalanceMiddleware(db), balanceHandler.BalanceApprove)
+	api.POST("/balance-transfer", middleware.DBApproveBalanceMiddleware(db), balanceHandler.BalanceTransfer)
 
 	// PROFILE
 	api.POST("/avatars", middleware.AuthMiddleware(authService, userService), userHandler.UploadAvatar)

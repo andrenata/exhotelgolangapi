@@ -4,6 +4,7 @@ import (
 	"cager/balance"
 	"cager/helper"
 	"cager/topup"
+	"cager/transfer"
 	"cager/user"
 	"net/http"
 
@@ -12,12 +13,13 @@ import (
 )
 
 type balanceHandler struct {
-	balanceService balance.Service
-	topupService   topup.Service
+	balanceService  balance.Service
+	topupService    topup.Service
+	transferService transfer.Service
 }
 
-func NewBalanceHandler(balanceService balance.Service, topupService topup.Service) *balanceHandler {
-	return &balanceHandler{balanceService, topupService}
+func NewBalanceHandler(balanceService balance.Service, topupService topup.Service, transferService transfer.Service) *balanceHandler {
+	return &balanceHandler{balanceService, topupService, transferService}
 }
 
 func (h *balanceHandler) CreateBalance(c *gin.Context) {
@@ -108,5 +110,58 @@ func (h *balanceHandler) BalanceApprove(c *gin.Context) {
 	}
 
 	response := helper.APIResponse("Approve Top Up Success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *balanceHandler) BalanceTransfer(c *gin.Context) {
+
+	var input user.TransferInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Transfer Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	isCheckPin, err := h.balanceService.ServiceCheckPin(input.IdGiver, input.Pin)
+	if err != nil {
+		response := helper.APIResponse("Pin Failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	if !isCheckPin {
+		response := helper.APIResponse("Pin Failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	txHandle := c.MustGet("db_trx").(*gorm.DB)
+
+	if err := h.transferService.WithTrx(txHandle).IncrementMoney(uint(input.IdReciever), float64(input.Amount)); err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Error while incrementing money", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		txHandle.Rollback()
+		return
+	}
+
+	if err := h.transferService.WithTrx(txHandle).DecrementMoney(uint(input.IdGiver), float64(input.Amount)); err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Error while decrementing money", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		txHandle.Rollback()
+		return
+	}
+
+	if err := txHandle.Commit().Error; err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("trx commit error:", http.StatusOK, "success", errorMessage)
+		c.JSON(http.StatusOK, response)
+	}
+
+	response := helper.APIResponse("Transfer Success", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
 }
