@@ -30,7 +30,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	if err != nil {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Register account failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.APIResponse("Validation account failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 
 		return
@@ -47,7 +47,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	// token
 	token, err := h.authService.GenerateToken(newUser.ID)
 	if err != nil {
-		response := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Generate token failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -89,6 +89,52 @@ func (h *userHandler) Login(c *gin.Context) {
 
 	formatter := user.FormatUser(loggedinUser, token)
 	response := helper.APIResponse("Login success", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) GetBalanceHandler(c *gin.Context) {
+	// var input user.GetBalance
+	// err := c.ShouldBindJSON(&input)
+	// if err != nil {
+	// 	errors := helper.FormatValidationError(err)
+	// 	errorMessage := gin.H{"errors": errors}
+	// 	response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
+	// 	c.JSON(http.StatusUnprocessableEntity, response)
+	// 	return
+	// }
+
+	// get from jwt
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	profile, err := h.userService.GetUserbyId(userId)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formatter := user.FormatBalance(profile)
+	response := helper.APIResponse("Get balance", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) GetUserProfile(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	profile, err := h.userService.GetUserbyId(userId)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formatter := user.FormatProfile(profile)
+	response := helper.APIResponse("Get Profile", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 }
 

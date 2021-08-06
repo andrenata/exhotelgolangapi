@@ -5,6 +5,10 @@ type RegisterUserInput struct {
 	Email       string `json:"email" binding:"required,email"`
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phonenumber" binding:"required"`
+	Address     string `json:"address" binding:"required"`
+	City        string `json:"city" binding:"required"`
+	State       string `json:"state" binding:"required"`
+	Country     string `json:"country" binding:"required"`
 }
 
 type LoginInput struct {
@@ -58,4 +62,8 @@ type InputChangeNumber struct {
 // BALANCE
 type ChangeBalanceTemp struct {
 	BalanceTemporary int `json:"balance_temporary" binding:"required"`
+}
+
+type GetBalance struct {
+	Token string `json:"token" binding:"required"`
 }

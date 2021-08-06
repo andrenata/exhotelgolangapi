@@ -6,6 +6,7 @@ import (
 	"cager/handler"
 	"cager/middleware"
 	"cager/payment"
+	"cager/pulsa"
 	"cager/topup"
 	"cager/transfer"
 	"cager/user"
@@ -24,6 +25,34 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	// TEST
+	// postBody, _ := json.Marshal(map[string]string{
+	// 	"cmd":      "prepaid",
+	// 	"username": "wenolooeK13W",
+	// 	"sign":     "b9baafeded7a9fc27f3f78f79fd8623b",
+	// })
+
+	// responseBody := bytes.NewBuffer(postBody)
+
+	// //Leverage Go's HTTP Post function to make request
+	// resp, err := http.Post("https://api.digiflazz.com/v1/price-list", "application/json", responseBody)
+	// if err != nil {
+	// 	fmt.Println("Error")
+	// }
+	// // defer resp.Body.Close()
+
+	// //Read the response body
+	// body, err := ioutil.ReadAll(resp.Body)
+
+	// if err != nil {
+	// 	fmt.Println("Error")
+	// }
+
+	// sb := string(body)
+	// fmt.Println(sb)
+
+	// END TEST
+
 	userRepository := user.NewRepository(db)
 	paymentRepository := payment.NewRepository(db)
 	balanceRepository := balance.NewRepository(db)
@@ -35,12 +64,14 @@ func main() {
 	balanceService := balance.NewService(balanceRepository, userService, paymentService, userRepository)
 	topupService := topup.NewService(topupRepository)
 	transferService := transfer.NewService(transferRepository)
+	pulsaService := pulsa.NewService()
 
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	paymentHandler := handler.NewPaymentHandler(paymentService)
 	balanceHandler := handler.NewBalanceHandler(balanceService, topupService, transferService)
+	pulsaHandler := handler.NewPulsaHandler(pulsaService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -69,6 +100,14 @@ func main() {
 
 	api.POST("/change-phone-number", middleware.AuthMiddleware(authService, userService), userHandler.HandlerChangePhoneNumber)
 	api.POST("/change-email", middleware.AuthMiddleware(authService, userService), userHandler.ChangeEmailHandler)
-	router.Run()
+
+	api.GET("/balance", middleware.AuthMiddleware(authService, userService), userHandler.GetBalanceHandler)
+	api.GET("/profile-user", middleware.AuthMiddleware(authService, userService), userHandler.GetUserProfile)
+
+	// PULSA
+	api.POST("/pulsa-telkomsel", middleware.AuthMiddleware(authService, userService), pulsaHandler.FindByBrand)
+	router.Run(":8090")
+
+	// http.ListenAndServe(":8090", nil)
 
 }

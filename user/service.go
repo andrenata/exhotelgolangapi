@@ -21,6 +21,9 @@ type Service interface {
 	ServiceCheckPinTemporary(id int, input CheckPin) (bool, error)
 	ServiceChangePinTemporary(id int, input ChangePinTemporary) (User, error)
 	ChangeBalanceTempService(id int, input ChangeBalanceTemp) (User, error)
+	BalanceBuy(id int, amount int) (User, error)
+	BalancePlus(id int, amount int) (User, error)
+	// GetBalanceService(id int) (User, error)
 }
 
 type service struct {
@@ -41,6 +44,10 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user.Balance = 0
 	user.BalanceTemporary = 0
 	user.PhoneNumber = input.PhoneNumber
+	user.Address = input.Address
+	user.City = input.City
+	user.State = input.State
+	user.Country = input.Country
 	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	if err != nil {
 		return user, err
@@ -300,4 +307,38 @@ func (s *service) ChangeBalanceTempService(id int, input ChangeBalanceTemp) (Use
 		return changeBalanceTemp, err
 	}
 	return changeBalanceTemp, nil
+}
+
+func (s *service) BalanceBuy(id int, amount int) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+	if user.Balance < amount {
+		return user, errors.New("Saldo tidak mencukupi")
+	}
+
+	user.Balance = user.Balance - amount
+	changeBalance, err := s.repository.Update(user)
+
+	if err != nil {
+		return changeBalance, err
+	}
+	return changeBalance, nil
+
+}
+
+func (s *service) BalancePlus(id int, amount int) (User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+
+	user.Balance = user.Balance + amount
+	changeBalance, err := s.repository.Update(user)
+
+	if err != nil {
+		return changeBalance, err
+	}
+	return changeBalance, nil
 }
