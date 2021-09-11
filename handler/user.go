@@ -4,7 +4,6 @@ import (
 	"cager/auth"
 	"cager/helper"
 	"cager/user"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,10 +35,25 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
+	// FIND EMAIL
+	email := input.Email
+	isAvailable, err := h.userService.IsEmailAvailable(email)
+	if err != nil {
+		response := helper.APIResponse("Register email failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if isAvailable == false {
+		response := helper.APIResponse("Register email failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
 	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
-		response := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -92,35 +106,6 @@ func (h *userHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *userHandler) GetBalanceHandler(c *gin.Context) {
-	// var input user.GetBalance
-	// err := c.ShouldBindJSON(&input)
-	// if err != nil {
-	// 	errors := helper.FormatValidationError(err)
-	// 	errorMessage := gin.H{"errors": errors}
-	// 	response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
-	// 	c.JSON(http.StatusUnprocessableEntity, response)
-	// 	return
-	// }
-
-	// get from jwt
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	profile, err := h.userService.GetUserbyId(userId)
-	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-		response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	formatter := user.FormatBalance(profile)
-	response := helper.APIResponse("Get balance", http.StatusOK, "success", formatter)
-	c.JSON(http.StatusOK, response)
-
-}
-
 func (h *userHandler) GetUserProfile(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(user.User)
 	userId := currentUser.ID
@@ -154,7 +139,8 @@ func (h *userHandler) ChekEmailAvailability(c *gin.Context) {
 		return
 	}
 
-	isEmailAvailable, err := h.userService.IsEmailAvailable(input)
+	email := input.Email
+	isEmailAvailable, err := h.userService.IsEmailAvailable(email)
 	if err != nil {
 		errorMessage := gin.H{"errors": "Server error"}
 		response := helper.APIResponse("Check email failed", http.StatusUnprocessableEntity, "error", errorMessage)
@@ -175,271 +161,6 @@ func (h *userHandler) ChekEmailAvailability(c *gin.Context) {
 	}
 
 	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) ChekPhoneAvailability(c *gin.Context) {
-	var input user.CheckPhoneInput
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Input check phone failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	isPhoneAvailable, err := h.userService.IsPhoneAvailable(input)
-	if err != nil {
-		errorMessage := gin.H{"errors": "Server error"}
-		response := helper.APIResponse("Check phone failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	data := gin.H{
-		"is_available": isPhoneAvailable,
-	}
-
-	metaMessage := "Phone number has been registered"
-	metaStatus := "error"
-
-	if isPhoneAvailable {
-		metaMessage = "Phone number is available"
-		metaStatus = "success"
-	}
-
-	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) UploadAvatar(c *gin.Context) {
-	// input data from user
-	// simpan gambarnya di gambar "/images"
-	// di service kita panggil repo
-	// JWT (sementara hardcode, seakan akan user id = 1)
-	// repo ambil data user = 1
-	// repo update data user simpan lokasi file
-	// c.SaveUploadedFile(file, )
-	file, err := c.FormFile("avatar")
-	if err != nil {
-		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("Failed to upload avatar", http.StatusUnprocessableEntity, "error", data)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	// get from jwt
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	// path := "images/" + file.Filename
-	path := fmt.Sprintf("images/%d-%s", userId, file.Filename)
-
-	err = c.SaveUploadedFile(file, path)
-	if err != nil {
-		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("Failed to upload avatar", http.StatusUnprocessableEntity, "error", data)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	_, err = h.userService.SaveAvatar(userId, path)
-
-	if err != nil {
-		data := gin.H{"is_uploaded": false}
-		response := helper.APIResponse("Avatar uploaded", http.StatusUnprocessableEntity, "error", data)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	data := gin.H{"is_uploaded": true}
-	response := helper.APIResponse("Avatar uploaded", http.StatusOK, "success", data)
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) HandlerChangePin(c *gin.Context) {
-	var input user.ChangePin
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("PIN updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	_, err = h.userService.ServiceChangePin(userId, input)
-	if err != nil {
-		// errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": err.Error()}
-		response := helper.APIResponse("PIN Updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-
-	}
-
-	data := gin.H{"is_updated": true}
-	response := helper.APIResponse("PIN updated", http.StatusOK, "success", data)
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) HandlerChangePinTemporary(c *gin.Context) {
-	var input user.ChangePinTemporary
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Input PIN failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	_, err = h.userService.ServiceChangePinTemporary(userId, input)
-	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-		response := helper.APIResponse("PIN Updated failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	data := gin.H{"is_updated": true}
-	response := helper.APIResponse("PIN updated", http.StatusOK, "success", data)
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) ChangeName(c *gin.Context) {
-	var input user.ChangeNameInput
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Change name failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-	// get from jwt
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	_, err = h.userService.ServiceChangeName(userId, input)
-	if err != nil {
-		response := helper.APIResponse("Change name failed", http.StatusUnprocessableEntity, "error", nil)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	response := helper.APIResponse("Changed name success", http.StatusOK, "success", nil)
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) HandlerCheckPin(c *gin.Context) {
-	var input user.CheckPin
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("PIN failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	isCheckPin, err := h.userService.ServiceCheckPin(userId, input.Pin)
-	if err != nil {
-		response := helper.APIResponse("Server Error", http.StatusUnprocessableEntity, "error", nil)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	data := gin.H{
-		"is_true": isCheckPin,
-	}
-
-	metaMessage := "Check is different"
-	metaStatus := "error"
-
-	if isCheckPin {
-		metaMessage = "PIN success"
-		metaStatus = "success"
-	}
-
-	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
-	c.JSON(http.StatusOK, response)
-}
-
-func (h *userHandler) HandlerCheckPinTemporary(c *gin.Context) {
-	var input user.CheckPin
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("PIN failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-
-	isCheckPin, err := h.userService.ServiceCheckPinTemporary(userId, input)
-	if err != nil {
-		response := helper.APIResponse("Server Error", http.StatusUnprocessableEntity, "error", nil)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	data := gin.H{
-		"is_true": isCheckPin,
-	}
-
-	metaMessage := "Check is different"
-	metaStatus := "error"
-
-	if isCheckPin {
-		metaMessage = "PIN success"
-		metaStatus = "success"
-	}
-
-	response := helper.APIResponse(metaMessage, http.StatusOK, metaStatus, data)
-	c.JSON(http.StatusOK, response)
-}
-
-func (h *userHandler) HandlerChangePhoneNumber(c *gin.Context) {
-	var input user.InputChangeNumber
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Change phone number failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	currentUser := c.MustGet("currentUser").(user.User)
-	userId := currentUser.ID
-	_, err = h.userService.ServiceChangePhoneNumber(userId, input)
-	if err != nil {
-		response := helper.APIResponse("Change phone number failed", http.StatusUnprocessableEntity, "error", nil)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	response := helper.APIResponse("Changed phone number success", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
 
 }
@@ -477,4 +198,98 @@ func (h *userHandler) FetchUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 
+}
+
+func (h *userHandler) ChangeNameHandler(c *gin.Context) {
+	var input user.ChangeNameInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change name failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	_, err = h.userService.ServiceChangeName(userId, input)
+	if err != nil {
+		response := helper.APIResponse("Change name failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	response := helper.APIResponse("Change name success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) GetAllUsers(c *gin.Context) {
+	users, err := h.userService.GetAllUsers()
+	if err != nil {
+		response := helper.APIResponse("Get users failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+	formatter := user.FormatUsers(users)
+	response := helper.APIResponse("Get Profile", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) ChangePassword(c *gin.Context) {
+	var input user.ChangePassword
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change password failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	if input.Password != input.PasswordCheck {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change password failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+	_, err = h.userService.ChangePassword(userId, input)
+
+	if err != nil {
+		response := helper.APIResponse("Change password failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	response := helper.APIResponse("Change password success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) DeleteUser(c *gin.Context) {
+	var input user.DeleteInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Delete user failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	del, err := h.userService.Delete(input)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	if del != true {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	response := helper.APIResponse("Delete user", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
 }

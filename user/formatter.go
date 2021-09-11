@@ -1,40 +1,20 @@
 package user
 
-import "time"
-
 type UserFormatter struct {
-	ID               int       `json:"id"`
-	Name             string    `json:"name"`
-	Email            string    `json:"email"`
-	PhoneNumber      string    `json:"phonenumber"`
-	TypeVerified     int       `json:"typeverified"`
-	KtpPassport      string    `json:"ktppassport"`
-	Address          string    `json:"address"`
-	City             string    `json:"city"`
-	State            string    `json:"state"`
-	Country          string    `json:"country"`
-	Balance          int       `json:"balance"`
-	Token            string    `json:"token"`
-	BalanceTemporary int       `json:"balancetemporary"`
-	PicturePath      string    `json:"picturepath"`
-	IsActive         int       `json:"isactive"`
-	IsVerified       int       `json:"isverified"`
-	EmailVerifiedAt  time.Time `json:"emailverifiedat"`
-	PhoneVerifiedAt  time.Time `json:"phoneverifiedat"`
-}
-
-type BalanceFormatter struct {
-	Balance int `json:"balance"`
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Active int    `json:"active"`
+	Token  string `json:"token"`
 }
 
 func FormatUser(user User, token string) UserFormatter {
 	formatter := UserFormatter{
-		ID:          user.ID,
-		Name:        user.Name,
-		Email:       user.Email,
-		PhoneNumber: user.PhoneNumber,
-		Balance:     user.Balance,
-		Token:       token,
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Active: user.Active,
+		Token:  token,
 	}
 
 	return formatter
@@ -42,30 +22,21 @@ func FormatUser(user User, token string) UserFormatter {
 
 func FormatProfile(user User) UserFormatter {
 	formatter := UserFormatter{
-		ID:               user.ID,
-		Name:             user.Name,
-		Email:            user.Email,
-		PhoneNumber:      user.PhoneNumber,
-		TypeVerified:     user.TypeVerified,
-		KtpPassport:      user.KtpPassport,
-		Address:          user.Address,
-		City:             user.City,
-		State:            user.State,
-		Country:          user.Country,
-		Balance:          user.Balance,
-		BalanceTemporary: user.BalanceTemporary,
-		PicturePath:      user.PicturePath,
-		IsActive:         user.IsActive,
-		IsVerified:       user.IsVerified,
-		EmailVerifiedAt:  user.EmailVerifiedAt,
-		PhoneVerifiedAt:  user.PhoneVerifiedAt,
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Active: user.Active,
 	}
 	return formatter
 }
 
-func FormatBalance(user User) BalanceFormatter {
-	formatter := BalanceFormatter{
-		Balance: user.Balance,
+func FormatUsers(users []User) []UserFormatter {
+	userFormatter := []UserFormatter{}
+
+	for _, user := range users {
+		formatter := FormatProfile(user)
+		userFormatter = append(userFormatter, formatter)
 	}
-	return formatter
+
+	return userFormatter
 }

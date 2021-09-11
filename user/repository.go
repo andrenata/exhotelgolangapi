@@ -7,7 +7,8 @@ type Repository interface {
 	FindByEmail(email string) (User, error)
 	FindById(id int) (User, error)
 	Update(user User) (User, error)
-	FindByPhone(PhoneNumber string) (User, error)
+	AllUser() ([]User, error)
+	Delete(id int, user User) (bool, error)
 }
 
 type repository struct {
@@ -28,20 +29,18 @@ func (r *repository) Save(user User) (User, error) {
 	return user, nil
 }
 
+func (r *repository) AllUser() ([]User, error) {
+	var users []User
+	err := r.db.Find(&users).Error
+	if err != nil {
+		return users, err
+	}
+	return users, nil
+}
+
 func (r *repository) FindByEmail(email string) (User, error) {
 	var user User
 	err := r.db.Where("email = ?", email).Find(&user).Error
-	if err != nil {
-		return user, err
-	}
-
-	return user, nil
-
-}
-
-func (r *repository) FindByPhone(PhoneNumber string) (User, error) {
-	var user User
-	err := r.db.Where("phone_number = ?", PhoneNumber).Find(&user).Error
 	if err != nil {
 		return user, err
 	}
@@ -72,12 +71,10 @@ func (r *repository) Update(user User) (User, error) {
 	return user, nil
 }
 
-// func (r *repository) CheckPin(id int, pin string) (User, error) {
-// 	var user User
-
-// 	err := r.db.Where("id = ? AND pin = ?", id, pin).Find(&user).Error
-// 	if err != nil {
-// 		return user, err
-// 	}
-// 	return user, nil
-// }
+func (r *repository) Delete(id int, user User) (bool, error) {
+	err := r.db.Where("id = ?", id).Delete(&user).Error
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

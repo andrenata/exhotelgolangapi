@@ -9,21 +9,13 @@ import (
 type Service interface {
 	RegisterUser(input RegisterUserInput) (User, error)
 	Login(input LoginInput) (User, error)
-	IsEmailAvailable(input CheckEmailInput) (bool, error)
-	SaveAvatar(id int, fileLocation string) (User, error)
+	IsEmailAvailable(email string) (bool, error)
 	GetUserbyId(id int) (User, error)
 	ServiceChangeName(id int, input ChangeNameInput) (User, error)
-	ServiceCheckPin(id int, pin string) (bool, error)
-	ServiceChangePin(id int, input ChangePin) (User, error)
-	ServiceChangePhoneNumber(id int, input InputChangeNumber) (User, error)
 	ChangeEmailService(id int, input ChangeEmailInput) (User, error)
-	IsPhoneAvailable(input CheckPhoneInput) (bool, error)
-	ServiceCheckPinTemporary(id int, input CheckPin) (bool, error)
-	ServiceChangePinTemporary(id int, input ChangePinTemporary) (User, error)
-	ChangeBalanceTempService(id int, input ChangeBalanceTemp) (User, error)
-	BalanceBuy(id int, amount int) (User, error)
-	BalancePlus(id int, amount int) (User, error)
-	// GetBalanceService(id int) (User, error)
+	GetAllUsers() ([]User, error)
+	ChangePassword(id int, input ChangePassword) (bool, error)
+	Delete(input DeleteInput) (bool, error)
 }
 
 type service struct {
@@ -38,30 +30,12 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user := User{}
 	user.Name = input.Name
 	user.Email = input.Email
-	user.TypeVerified = 0
-	user.IsVerified = 0
-	user.IsActive = 0
-	user.Balance = 0
-	user.BalanceTemporary = 0
-	user.PhoneNumber = input.PhoneNumber
-	user.Address = input.Address
-	user.City = input.City
-	user.State = input.State
-	user.Country = input.Country
+	user.Active = 1
 	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	if err != nil {
 		return user, err
 	}
 	user.Password = string(Password)
-
-	checkPhone, err := s.repository.FindByPhone(input.PhoneNumber)
-	if err != nil {
-		return checkPhone, err
-	}
-
-	if checkPhone.ID != 0 {
-		return checkPhone, errors.New("Phone number has been registered")
-	}
 
 	newUser, err := s.repository.Save(user)
 	if err != nil {
@@ -96,8 +70,7 @@ func (s *service) Login(input LoginInput) (User, error) {
 // mapping struct input ke struct user
 // simpan struct user ke responsitory
 
-func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
-	email := input.Email
+func (s *service) IsEmailAvailable(email string) (bool, error) {
 
 	user, err := s.repository.FindByEmail(email)
 	if err != nil {
@@ -111,41 +84,6 @@ func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	return false, nil
 }
 
-func (s *service) IsPhoneAvailable(input CheckPhoneInput) (bool, error) {
-	phone := input.PhoneNumber
-
-	user, err := s.repository.FindByPhone(phone)
-	if err != nil {
-		return false, err
-	}
-
-	if user.ID == 0 {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func (s *service) SaveAvatar(id int, fileLocation string) (User, error) {
-	// dapatkan user by ID
-	// update attribute avatar file name
-	// simpan perubahan avatar file name
-
-	user, err := s.repository.FindById(id)
-	if err != nil {
-		return user, err
-	}
-
-	user.PicturePath = fileLocation
-
-	updatedUser, err := s.repository.Update(user)
-	if err != nil {
-		return updatedUser, err
-	}
-
-	return updatedUser, nil
-}
-
 func (s *service) GetUserbyId(id int) (User, error) {
 	user, err := s.repository.FindById(id)
 	if err != nil {
@@ -157,6 +95,14 @@ func (s *service) GetUserbyId(id int) (User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *service) GetAllUsers() ([]User, error) {
+	users, err := s.repository.AllUser()
+	if err != nil {
+		return users, err
+	}
+	return users, nil
 }
 
 func (s *service) ServiceChangeName(id int, input ChangeNameInput) (User, error) {
@@ -175,112 +121,6 @@ func (s *service) ServiceChangeName(id int, input ChangeNameInput) (User, error)
 
 }
 
-func (s *service) ServiceChangePin(id int, input ChangePin) (User, error) {
-	newpin := input.Pin
-	user, err := s.repository.FindById(id)
-	if err != nil {
-		return user, nil
-	}
-	if user.ID == 0 {
-		return user, errors.New("PIN is different")
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.PinTemporary), []byte(newpin))
-	if err != nil {
-		return user, err
-	}
-
-	pin, err := bcrypt.GenerateFromPassword([]byte(input.Pin), bcrypt.MinCost)
-	if err != nil {
-		return user, err
-	}
-
-	user.Pin = string(pin)
-	user.PinTemporary = ""
-	updatePin, err := s.repository.Update(user)
-	if err != nil {
-		return updatePin, err
-	}
-
-	return updatePin, nil
-
-}
-
-func (s *service) ServiceChangePinTemporary(id int, input ChangePinTemporary) (User, error) {
-	user, err := s.repository.FindById(id)
-	if err != nil {
-		return user, err
-	}
-
-	Pin, err := bcrypt.GenerateFromPassword([]byte(input.PinTemporary), bcrypt.MinCost)
-	if err != nil {
-		return user, err
-	}
-
-	user.PinTemporary = string(Pin)
-	updatePin, err := s.repository.Update(user)
-	if err != nil {
-		return updatePin, err
-	}
-
-	return updatePin, nil
-
-}
-
-func (s *service) ServiceCheckPin(id int, pin string) (bool, error) {
-
-	user, err := s.repository.FindById(id)
-	if err != nil {
-		return false, err
-	}
-
-	if user.ID == 0 {
-		return false, errors.New("User failed")
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.Pin), []byte(pin))
-	if err != nil {
-		return false, errors.New("PIN is different")
-	}
-
-	return true, nil
-
-}
-
-func (s *service) ServiceCheckPinTemporary(id int, input CheckPin) (bool, error) {
-
-	user, err := s.repository.FindById(id)
-	if err != nil {
-		return false, err
-	}
-
-	if user.ID == 0 {
-		return false, nil
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.PinTemporary), []byte(input.Pin))
-	if err != nil {
-		return false, nil
-	}
-
-	return true, nil
-
-}
-
-func (s *service) ServiceChangePhoneNumber(id int, input InputChangeNumber) (User, error) {
-	user, err := s.repository.FindById(id)
-	if err != nil {
-		return user, err
-	}
-
-	user.PhoneNumber = input.PhoneNumber
-	changedPhone, err := s.repository.Update(user)
-	if err != nil {
-		return changedPhone, err
-	}
-	return changedPhone, nil
-}
-
 func (s *service) ChangeEmailService(id int, input ChangeEmailInput) (User, error) {
 	user, err := s.repository.FindById(id)
 	if err != nil {
@@ -295,50 +135,31 @@ func (s *service) ChangeEmailService(id int, input ChangeEmailInput) (User, erro
 	return changedEmail, nil
 }
 
-// BALANCE
-func (s *service) ChangeBalanceTempService(id int, input ChangeBalanceTemp) (User, error) {
+func (s *service) ChangePassword(id int, input ChangePassword) (bool, error) {
 	user, err := s.repository.FindById(id)
 	if err != nil {
-		return user, err
+		return false, err
 	}
-	user.BalanceTemporary = input.BalanceTemporary
-	changeBalanceTemp, err := s.repository.Update(user)
-	if err != nil {
-		return changeBalanceTemp, err
-	}
-	return changeBalanceTemp, nil
-}
+	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 
-func (s *service) BalanceBuy(id int, amount int) (User, error) {
-	user, err := s.repository.FindById(id)
+	user.Password = string(Password)
+	_, err = s.repository.Update(user)
 	if err != nil {
-		return user, err
+		return false, err
 	}
-	if user.Balance < amount {
-		return user, errors.New("Saldo tidak mencukupi")
-	}
-
-	user.Balance = user.Balance - amount
-	changeBalance, err := s.repository.Update(user)
-
-	if err != nil {
-		return changeBalance, err
-	}
-	return changeBalance, nil
+	return true, nil
 
 }
 
-func (s *service) BalancePlus(id int, amount int) (User, error) {
-	user, err := s.repository.FindById(id)
+func (s *service) Delete(input DeleteInput) (bool, error) {
+	user, err := s.repository.FindById(input.ID)
 	if err != nil {
-		return user, err
+		return false, err
 	}
 
-	user.Balance = user.Balance + amount
-	changeBalance, err := s.repository.Update(user)
-
+	_, err = s.repository.Delete(input.ID, user)
 	if err != nil {
-		return changeBalance, err
+		return false, err
 	}
-	return changeBalance, nil
+	return true, nil
 }
