@@ -5,6 +5,7 @@ import (
 	"cager/category"
 	"cager/handler"
 	"cager/middleware"
+	"cager/product"
 	"cager/user"
 	"log"
 
@@ -24,15 +25,18 @@ func main() {
 	// REPOSITORY
 	userRepository := user.NewRepository(db)
 	categoryRepository := category.NewRepository(db)
+	productRepository := product.NewRepository(db)
 
 	// SERVICE
 	userService := user.NewService(userRepository)
 	categoryService := category.NewService(categoryRepository)
+	productService := product.NewService(productRepository)
 
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService, authService)
+	productHandler := handler.NewProductHandler(productService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -53,6 +57,18 @@ func main() {
 	api.POST("/category/register", middleware.AuthMiddleware(authService, userService), categoryHandler.RegisterCategory)
 	api.POST("/category/update", middleware.AuthMiddleware(authService, userService), categoryHandler.UpdateCategory)
 	api.POST("/category/delete", middleware.AuthMiddleware(authService, userService), categoryHandler.DeleteCategory)
+
+	// PRODUCT
+	api.GET("/product", productHandler.GetAllProduct)
+	api.POST("/product/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateProductName)
+	api.POST("/product/update", middleware.AuthMiddleware(authService, userService), productHandler.UpdateProduct)
+
+	// SLIDER
+	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
+	api.POST("/slider/del", middleware.AuthMiddleware(authService, userService), productHandler.DelSlider)
+
+	// DISCOUNT
+	api.POST("/discount/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateDiscount)
 
 	router.Run(":8090")
 

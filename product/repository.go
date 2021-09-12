@@ -6,11 +6,12 @@ type Repository interface {
 	Save(product Product) (Product, error)
 	Update(product Product) (Product, error)
 	FindById(id int) (Product, error)
-	FindByName(name string) (Product, error)
+	// FindByName(name string) (Product, error)
 	FindByActive(active int) (Product, error)
 	FindAll() ([]Product, error)
 	FindProductByCategory(slug string) (Product, error)
 	DelProduct(id int, product Product) (bool, error)
+	FindBySlug(slug string) (Product, error)
 
 	// SLIDER
 	FindAllSlider() ([]Slider, error)
@@ -64,6 +65,18 @@ func (r *repository) FindById(id int) (Product, error) {
 	var product Product
 
 	err := r.db.Where("id = ?", id).Find(&product).Error
+
+	if err != nil {
+		return product, err
+	}
+
+	return product, nil
+}
+
+func (r *repository) FindBySlug(slug string) (Product, error) {
+	var product Product
+
+	err := r.db.Where("slug = ?", slug).Find(&product).Error
 
 	if err != nil {
 		return product, err

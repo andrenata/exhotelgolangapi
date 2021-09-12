@@ -5,19 +5,18 @@ import (
 )
 
 type Product struct {
-	ID                int
-	Name              string
-	Slug              string
-	Bahan             string
-	Price             int
-	Stock             int
-	Active            int
-	Description       string
-	DiscountID        int
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	Sliders           []Slider
-	CategoryRelations []CategoryRelation
+	ID          int
+	Name        string
+	Slug        string
+	Bahan       string
+	Price       int
+	Stock       int
+	Active      int
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Sliders     []Slider
+	Discounts   []Discount
 }
 
 type Slider struct {

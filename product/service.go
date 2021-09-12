@@ -11,10 +11,12 @@ type Service interface {
 	// PRODUCT
 	FindAllProductService() ([]Product, error)
 	FindProductById(id int) (Product, error)
+	FindProductBySlug(slug string) (bool, error)
 	CreateProductService(input CreateProductInput) (Product, error)
-	UpdateProductService(id int, input CreateProductInput) (Product, error)
+	UpdateProductService(input UpdateProductInput) (Product, error)
 	DelProductService(id int) (bool, error)
 	UpdateProductByActiveService(id int, input UpdateProductByActiveInput) (Product, error)
+	CreateProductByName(input CreateProductByName) (Product, error)
 
 	// DISCOUNT
 	// FindAllDiscountService() ([]Discount, error)
@@ -113,6 +115,20 @@ func (s *service) UpdateSliderByPostService(idslider int, idproduct int) (Slider
 }
 
 // ============ PRODUCT
+func (s *service) CreateProductByName(input CreateProductByName) (Product, error) {
+	product := Product{}
+	product.Name = input.Name
+	product.Slug = input.Slug
+	product.Active = 0
+
+	create, err := s.repository.Save(product)
+	if err != nil {
+		return create, err
+	}
+
+	return create, nil
+}
+
 func (s *service) FindAllProductService() ([]Product, error) {
 	products, err := s.repository.FindAll()
 	if err != nil {
@@ -127,6 +143,19 @@ func (s *service) FindProductById(id int) (Product, error) {
 		return product, err
 	}
 	return product, nil
+}
+
+func (s *service) FindProductBySlug(slug string) (bool, error) {
+	product, err := s.repository.FindBySlug(slug)
+	if err != nil {
+		return false, err
+	}
+
+	if product.ID == 0 {
+		return true, err
+	}
+
+	return false, nil
 }
 
 func (s *service) CreateProductService(input CreateProductInput) (Product, error) {
@@ -147,8 +176,8 @@ func (s *service) CreateProductService(input CreateProductInput) (Product, error
 	return create, nil
 }
 
-func (s *service) UpdateProductService(id int, input CreateProductInput) (Product, error) {
-	product, err := s.repository.FindById(id)
+func (s *service) UpdateProductService(input UpdateProductInput) (Product, error) {
+	product, err := s.repository.FindById(input.ID)
 	if err != nil {
 		return product, err
 	}
@@ -213,8 +242,9 @@ func (s *service) CreateDiscountService(input CreateDiscountInput) (Discount, er
 	discount.Persentase = input.Persentase
 	discount.Price = input.Price
 	discount.Active = input.Active
-	discount.StartDate = input.StartDate
-	discount.EndDate = input.EndDate
+	discount.ProductID = input.ProductID
+	// discount.StartDate = input.StartDate
+	// discount.EndDate = input.EndDate
 
 	create, err := s.repository.CreateDiscount(discount)
 	if err != nil {
@@ -235,8 +265,9 @@ func (s *service) UpdateDiscountService(id int, input CreateDiscountInput) (Disc
 	discount.Persentase = input.Persentase
 	discount.Price = input.Price
 	discount.Active = input.Active
-	discount.StartDate = input.StartDate
-	discount.EndDate = input.EndDate
+	discount.ProductID = input.ProductID
+	// discount.StartDate = input.StartDate
+	// discount.EndDate = input.EndDate
 
 	update, err := s.repository.UpdateDiscount(discount)
 	if err != nil {
