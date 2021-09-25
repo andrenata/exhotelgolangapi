@@ -16,6 +16,7 @@ type Service interface {
 	GetAllUsers() ([]User, error)
 	ChangePassword(id int, input ChangePassword) (bool, error)
 	Delete(input DeleteInput) (bool, error)
+	ChangeDetailService(input ChangeDetailInput) (User, error)
 }
 
 type service struct {
@@ -65,6 +66,30 @@ func (s *service) Login(input LoginInput) (User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *service) ChangeDetailService(input ChangeDetailInput) (User, error) {
+	user, err := s.repository.FindById(input.ID)
+	if err != nil {
+		return user, err
+	}
+
+	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
+	user.Password = string(Password)
+
+	user.Name = input.Name
+	user.Email = input.Email
+	user.Active = input.Active
+
+	changedDetail, err := s.repository.Update(user)
+	if err != nil {
+		return changedDetail, err
+	}
+	return changedDetail, nil
+
 }
 
 // mapping struct input ke struct user

@@ -2,10 +2,11 @@ package product
 
 type Service interface {
 	// FindAllSliderService() ([]Slider, error)
-	CreateSliderService(input CreateSliderInput) (Slider, error)
+	// CreateSliderService(input CreateSliderInput) (Slider, error)
 	// UpdateSliderService(id int, input UpdateSliderInput) (Slider, error)
 	// UpdateSliderByPostService(idslider int, idproduct int) (Slider, error)
 	// FindSliderByIdService(id int) (Slider, error)
+	CreateSliderService(name string) (Slider, error)
 	DelSliderService(id int) (bool, error)
 
 	// PRODUCT
@@ -43,12 +44,25 @@ func (s *service) FindAllSliderService() ([]Slider, error) {
 	return sliders, nil
 }
 
-func (s *service) CreateSliderService(input CreateSliderInput) (Slider, error) {
+// func (s *service) CreateSliderService(input CreateSliderInput) (Slider, error) {
+// 	slider := Slider{}
+// 	slider.Name = input.Name
+// 	slider.Filename = input.Filename
+// 	slider.IsPrimary = input.IsPrimary
+// 	slider.ProductID = input.ProductID
+
+// 	create, err := s.repository.CreateSlider(slider)
+// 	if err != nil {
+// 		return create, err
+// 	}
+
+// 	return create, nil
+
+// }
+
+func (s *service) CreateSliderService(name string) (Slider, error) {
 	slider := Slider{}
-	slider.Name = input.Name
-	slider.Filename = input.Filename
-	slider.IsPrimary = input.IsPrimary
-	slider.ProductID = input.ProductID
+	slider.Name = name
 
 	create, err := s.repository.CreateSlider(slider)
 	if err != nil {

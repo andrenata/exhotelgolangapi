@@ -38,7 +38,7 @@ func (h *productHandler) CreateProductName(c *gin.Context) {
 		return
 	}
 
-	if find != true {
+	if !find {
 		response := helper.APIResponse("Change With Other Title", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)
 		return
@@ -101,28 +101,56 @@ func (h *productHandler) CreateSlider(c *gin.Context) {
 	// validation input
 	// create slider
 
-	var input product.CreateSliderInput
+	file, err := c.FormFile("file")
 
-	err := c.ShouldBindJSON(&input)
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Validation Slider Failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-
-		return
-	}
-
-	slider, err := h.productService.CreateSliderService(input)
 	if err != nil {
 		response := helper.APIResponse("Created Slider Failed", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	formatter := product.FormatSlider(slider)
-	response := helper.APIResponse("Slider Created", http.StatusOK, "success", formatter)
+	// Set Folder untuk menyimpan filenya
+	path := "storage/" + file.Filename
+	if err := c.SaveUploadedFile(file, path); err != nil {
+		response := helper.APIResponse("Created Slider Failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.productService.CreateSliderService(file.Filename)
+	if err != nil {
+		response := helper.APIResponse("Created Slider Failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Slider Created", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
+
+	// ========
+
+	// var input product.CreateSliderInput
+
+	// err := c.ShouldBindJSON(&input)
+	// if err != nil {
+	// 	errors := helper.FormatValidationError(err)
+	// 	errorMessage := gin.H{"errors": errors}
+	// 	response := helper.APIResponse("Validation Slider Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+	// 	c.JSON(http.StatusUnprocessableEntity, response)
+
+	// 	return
+	// }
+
+	// slider, err := h.productService.CreateSliderService(input)
+	// if err != nil {
+	// 	response := helper.APIResponse("Created Slider Failed", http.StatusBadRequest, "error", err)
+	// 	c.JSON(http.StatusBadRequest, response)
+	// 	return
+	// }
+
+	// formatter := product.FormatSlider(slider)
+	// response := helper.APIResponse("Slider Created", http.StatusOK, "success", formatter)
+	// c.JSON(http.StatusOK, response)
 
 }
 
@@ -147,6 +175,30 @@ func (h *productHandler) DelSlider(c *gin.Context) {
 	}
 
 	response := helper.APIResponse("Slider Deleted", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) DelProduct(c *gin.Context) {
+	var input product.DelProductInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Product Failed", http.StatusUnprocessableEntity, "errors", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.productService.DelProductService(input.ID)
+
+	if err != nil {
+		response := helper.APIResponse("Del Product Failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Product Deleted", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
 }
 

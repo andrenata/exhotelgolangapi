@@ -9,6 +9,7 @@ import (
 	"cager/user"
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -39,6 +40,13 @@ func main() {
 	productHandler := handler.NewProductHandler(productService)
 
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:8080"}
+	config.AllowHeaders = []string{"Authorization", "Content-Type", "X-CSRF-Token"}
+
+	router.Use(cors.New(config))
+
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.Login)
@@ -49,6 +57,8 @@ func main() {
 	api.GET("/users", middleware.AuthMiddleware(authService, userService), userHandler.GetAllUsers)
 	api.POST("/user/change/password", middleware.AuthMiddleware(authService, userService), userHandler.ChangePassword)
 	api.POST("/user/delete", middleware.AuthMiddleware(authService, userService), userHandler.DeleteUser)
+	api.POST("/user/detail", middleware.AuthMiddleware(authService, userService), userHandler.GetUserByID)
+	api.POST("/user/change", middleware.AuthMiddleware(authService, userService), userHandler.ChangeDetailHandler)
 
 	// CATEGORY
 	api.GET("/category", categoryHandler.GetAllCategory)
@@ -62,6 +72,7 @@ func main() {
 	api.GET("/product", productHandler.GetAllProduct)
 	api.POST("/product/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateProductName)
 	api.POST("/product/update", middleware.AuthMiddleware(authService, userService), productHandler.UpdateProduct)
+	api.POST("/product/del", middleware.AuthMiddleware(authService, userService), productHandler.DelProduct)
 
 	// SLIDER
 	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)

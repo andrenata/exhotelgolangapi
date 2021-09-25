@@ -15,6 +15,14 @@ type ChangeEmailInput struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+type ChangeDetailInput struct {
+	ID       int    `json:"id" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Active   int    `json:"active" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type CheckEmailInput struct {
 	Email string `json:"email" binding:"required,email"`
 }
@@ -29,5 +37,9 @@ type ChangePassword struct {
 }
 
 type DeleteInput struct {
+	ID int `json:"id" binding:"required"`
+}
+
+type UserIdInput struct {
 	ID int `json:"id" binding:"required"`
 }

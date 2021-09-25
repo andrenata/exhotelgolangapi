@@ -88,3 +88,7 @@ type CreateDiscountInput struct {
 type UpdateDiscountByActiveInput struct {
 	Active int `json:"active" binding:"required"`
 }
+
+type DelProductInput struct {
+	ID int `json:"id" binding:"required"`
+}

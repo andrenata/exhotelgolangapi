@@ -123,6 +123,32 @@ func (h *userHandler) GetUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *userHandler) GetUserByID(c *gin.Context) {
+	var input user.UserIdInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("User Validation failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	profile, err := h.userService.GetUserbyId(input.ID)
+	if err != nil {
+		errorMessage := gin.H{"error": err.Error()}
+		response := helper.APIResponse("Please try again", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formatter := user.FormatProfile(profile)
+	response := helper.APIResponse("Get User", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+
+}
+
 func (h *userHandler) ChekEmailAvailability(c *gin.Context) {
 	// input email dari user
 	// input email di mapping ke struct
@@ -221,6 +247,27 @@ func (h *userHandler) ChangeNameHandler(c *gin.Context) {
 
 	response := helper.APIResponse("Change name success", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) ChangeDetailHandler(c *gin.Context) {
+	var input user.ChangeDetailInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Change Detail failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	_, err = h.userService.ChangeDetailService(input)
+	if err != nil {
+		response := helper.APIResponse("Change Detail failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+	}
+
+	response := helper.APIResponse("Change Detail success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
 }
 
 func (h *userHandler) GetAllUsers(c *gin.Context) {
