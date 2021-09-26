@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cager/category"
 	"cager/helper"
 	"cager/product"
 	"net/http"
@@ -14,6 +15,120 @@ type productHandler struct {
 
 func NewProductHandler(productService product.Service) *productHandler {
 	return &productHandler{productService}
+}
+
+// SLIDER RELATION
+func (h *productHandler) CreateSliderRelationHandler(c *gin.Context) {
+	var input product.CreateSliderRelationInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	check, err := h.productService.CheckSliderRelation(input.ProductID, input.SliderID)
+	if err != nil {
+		response := helper.APIResponse("Slider failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if !check {
+		response := helper.APIResponse("Slider has been selected", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	sliderRelation, err := h.productService.CreateSliderRelationService(input)
+	if err != nil {
+		response := helper.APIResponse("Create Slider failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatSliderRelation(sliderRelation)
+	response := helper.APIResponse("Create Products", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *productHandler) GetSliderRelationByProductIDHanlder(c *gin.Context) {
+	var input product.IDSliderRelationInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	sliderRelation, err := h.productService.GetSliderRelationByIDProductService(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Get Slider failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatSliders(sliderRelation)
+	response := helper.APIResponse("Get Slider", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) GetSliderRelationByIDHanlder(c *gin.Context) {
+	var input product.IDSliderRelationInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	sliderRelation, err := h.productService.GetSliderRelationByIDService(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Get Slider failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatSliderRelation(sliderRelation)
+	response := helper.APIResponse("Get Slider", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) DelSliderRelationHanlder(c *gin.Context) {
+	var input product.DelSliderProductInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	_, err = h.productService.DelSliderRelation(input.SliderID, input.ProductID)
+	if err != nil {
+		response := helper.APIResponse("Del Slider failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Del Slider", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
 }
 
 // CREATE PRODUCT BY NAME
@@ -68,6 +183,134 @@ func (h *productHandler) GetAllProduct(c *gin.Context) {
 	formatter := product.FormatProducts(products)
 	response := helper.APIResponse("Get All Products", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) FindProductByIDHandler(c *gin.Context) {
+	var input product.FindProductByIdInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Product Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	find, err := h.productService.FindProductById(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Find Product failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatProduct(find)
+	response := helper.APIResponse("Get Product", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) GetAllSliderHanlder(c *gin.Context) {
+	sliders, err := h.productService.FindAllSliderService()
+	if err != nil {
+		response := helper.APIResponse("Find Sliders failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatSliders(sliders)
+	response := helper.APIResponse("Get All Products", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+// CATEGORY RELATION
+func (h *productHandler) CreateCategoryRelationHandler(c *gin.Context) {
+	var input product.CreateCategoryRelationInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	check, err := h.productService.CheckCategoryRelation(input.ProductID, input.CategoryID)
+	if err != nil {
+		response := helper.APIResponse("Create failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if !check {
+		response := helper.APIResponse("Category has been selected", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	query, err := h.productService.CreateCategoryRelation(input)
+	if err != nil {
+		response := helper.APIResponse("Create failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatCategoryRelation(query)
+	response := helper.APIResponse("Create Success", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *productHandler) DelCategoryRelationHandler(c *gin.Context) {
+	var input product.CreateCategoryRelationInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	_, err = h.productService.DelCategoryRelation(input.ProductID, input.CategoryID)
+	if err != nil {
+		response := helper.APIResponse("Delete failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Delete Success", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) FindCategoryRelationHandler(c *gin.Context) {
+	var input product.IDSliderRelationInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	find, err := h.productService.FindCategoryRelation(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Find failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := category.FormatCategories(find)
+	response := helper.APIResponse("Find Success", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+
 }
 
 // SAVE PRODUCT
@@ -126,31 +369,6 @@ func (h *productHandler) CreateSlider(c *gin.Context) {
 
 	response := helper.APIResponse("Slider Created", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, response)
-
-	// ========
-
-	// var input product.CreateSliderInput
-
-	// err := c.ShouldBindJSON(&input)
-	// if err != nil {
-	// 	errors := helper.FormatValidationError(err)
-	// 	errorMessage := gin.H{"errors": errors}
-	// 	response := helper.APIResponse("Validation Slider Failed", http.StatusUnprocessableEntity, "error", errorMessage)
-	// 	c.JSON(http.StatusUnprocessableEntity, response)
-
-	// 	return
-	// }
-
-	// slider, err := h.productService.CreateSliderService(input)
-	// if err != nil {
-	// 	response := helper.APIResponse("Created Slider Failed", http.StatusBadRequest, "error", err)
-	// 	c.JSON(http.StatusBadRequest, response)
-	// 	return
-	// }
-
-	// formatter := product.FormatSlider(slider)
-	// response := helper.APIResponse("Slider Created", http.StatusOK, "success", formatter)
-	// c.JSON(http.StatusOK, response)
 
 }
 

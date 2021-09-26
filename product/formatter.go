@@ -10,6 +10,7 @@ type ProductFormatter struct {
 	Price       int    `json:"price"`
 	Stock       int    `json:"stock"`
 	Active      int    `json:"active"`
+	Views       int    `json:"views"`
 	Description string `json:"description"`
 }
 
@@ -22,6 +23,7 @@ func FormatProduct(product Product) ProductFormatter {
 		Price:       product.Price,
 		Stock:       product.Stock,
 		Active:      product.Active,
+		Views:       product.Views,
 		Description: product.Description,
 	}
 	return formatter
@@ -56,6 +58,66 @@ func FormatSlider(slider Slider) SliderFormatter {
 	}
 
 	return formatter
+}
+
+func FormatSliders(sliders []Slider) []SliderFormatter {
+	sliderFormatter := []SliderFormatter{}
+	for _, slider := range sliders {
+		formatter := FormatSlider(slider)
+		sliderFormatter = append(sliderFormatter, formatter)
+	}
+	return sliderFormatter
+}
+
+type SliderRelationFormatter struct {
+	ID        int `json:"id"`
+	ProductID int `json:"product_id"`
+	SliderID  int `json:"slider_id"`
+}
+
+func FormatSliderRelation(sliderRelation SliderRelation) SliderRelationFormatter {
+	formatter := SliderRelationFormatter{
+		ID:        sliderRelation.ID,
+		ProductID: sliderRelation.ProductID,
+		SliderID:  sliderRelation.SliderID,
+	}
+
+	return formatter
+}
+
+func FormatSliderRelations(sliderRelations []SliderRelation) []SliderRelationFormatter {
+	SliderRelationFormatter := []SliderRelationFormatter{}
+	for _, sliderRelation := range sliderRelations {
+		formatter := FormatSliderRelation(sliderRelation)
+		SliderRelationFormatter = append(SliderRelationFormatter, formatter)
+	}
+	return SliderRelationFormatter
+}
+
+// CATEGORY RELATION
+type CategoryRelationFormatter struct {
+	ID         int `json:"id"`
+	ProductID  int `json:"product_id"`
+	CategoryID int `json:"category_id"`
+}
+
+func FormatCategoryRelation(categoryRelation CategoryRelation) CategoryRelationFormatter {
+	formatter := CategoryRelationFormatter{
+		ID:         categoryRelation.ID,
+		ProductID:  categoryRelation.ProductID,
+		CategoryID: categoryRelation.CategoryID,
+	}
+
+	return formatter
+}
+
+func FormatCategoryRelations(categoryRelations []CategoryRelation) []CategoryRelationFormatter {
+	CategoryRelationFormatter := []CategoryRelationFormatter{}
+	for _, categoryRelation := range categoryRelations {
+		formatter := FormatCategoryRelation(categoryRelation)
+		CategoryRelationFormatter = append(CategoryRelationFormatter, formatter)
+	}
+	return CategoryRelationFormatter
 }
 
 // DISCOUNT

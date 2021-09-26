@@ -1,8 +1,9 @@
 package product
 
+import "cager/category"
+
 type Service interface {
-	// FindAllSliderService() ([]Slider, error)
-	// CreateSliderService(input CreateSliderInput) (Slider, error)
+	FindAllSliderService() ([]Slider, error)
 	// UpdateSliderService(id int, input UpdateSliderInput) (Slider, error)
 	// UpdateSliderByPostService(idslider int, idproduct int) (Slider, error)
 	// FindSliderByIdService(id int) (Slider, error)
@@ -25,6 +26,19 @@ type Service interface {
 	DelDiscountService(id int) (bool, error)
 	// UpdateDiscountService(id int, input CreateDiscountInput) (Discount, error)
 	// UpdateDiscountByActiveService(id int, input UpdateDiscountByActiveInput) (Discount, error)
+
+	// SLIDER RELATION
+	CheckSliderRelation(product_id int, slider_id int) (bool, error)
+	CreateSliderRelationService(input CreateSliderRelationInput) (SliderRelation, error)
+	DelSliderRelation(slider_id int, product_id int) (bool, error)
+	GetSliderRelationByIDProductService(id int) ([]Slider, error)
+	GetSliderRelationByIDService(id int) (SliderRelation, error)
+
+	// CATEGORY RELATION
+	CheckCategoryRelation(product_id int, category_id int) (bool, error)
+	CreateCategoryRelation(input CreateCategoryRelationInput) (CategoryRelation, error)
+	DelCategoryRelation(product_id int, category_id int) (bool, error)
+	FindCategoryRelation(id int) ([]category.Category, error)
 }
 
 type service struct {
@@ -44,25 +58,9 @@ func (s *service) FindAllSliderService() ([]Slider, error) {
 	return sliders, nil
 }
 
-// func (s *service) CreateSliderService(input CreateSliderInput) (Slider, error) {
-// 	slider := Slider{}
-// 	slider.Name = input.Name
-// 	slider.Filename = input.Filename
-// 	slider.IsPrimary = input.IsPrimary
-// 	slider.ProductID = input.ProductID
-
-// 	create, err := s.repository.CreateSlider(slider)
-// 	if err != nil {
-// 		return create, err
-// 	}
-
-// 	return create, nil
-
-// }
-
 func (s *service) CreateSliderService(name string) (Slider, error) {
 	slider := Slider{}
-	slider.Name = name
+	slider.Filename = name
 
 	create, err := s.repository.CreateSlider(slider)
 	if err != nil {
@@ -126,6 +124,93 @@ func (s *service) UpdateSliderByPostService(idslider int, idproduct int) (Slider
 	}
 
 	return update, nil
+}
+
+// SLIDER RELATION
+func (s *service) CheckSliderRelation(product_id int, slider_id int) (bool, error) {
+	check, err := s.repository.CheckSliderRelation(product_id, slider_id)
+	if err != nil {
+		return false, err
+	}
+
+	if check.ID == 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (s *service) CreateSliderRelationService(input CreateSliderRelationInput) (SliderRelation, error) {
+	sliderRelation := SliderRelation{}
+	sliderRelation.ProductID = input.ProductID
+	sliderRelation.SliderID = input.SliderID
+	create, err := s.repository.CreateSliderRelation(sliderRelation)
+	if err != nil {
+		return create, err
+	}
+	return create, nil
+}
+func (s *service) DelSliderRelation(slider_id int, product_id int) (bool, error) {
+	_, err := s.repository.DelSliderRelation(slider_id, product_id)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (s *service) GetSliderRelationByIDProductService(id int) ([]Slider, error) {
+	sliderRelation, err := s.repository.GetSliderRelationByProductID(id)
+	if err != nil {
+		return sliderRelation, err
+	}
+	return sliderRelation, nil
+}
+
+func (s *service) GetSliderRelationByIDService(id int) (SliderRelation, error) {
+	sliderRelation, err := s.repository.GetSliderRelationByID(id)
+	if err != nil {
+		return sliderRelation, err
+	}
+	return sliderRelation, nil
+}
+
+// CATEGORY RELATION
+func (s *service) CheckCategoryRelation(product_id int, category_id int) (bool, error) {
+	check, err := s.repository.CheckCategoryRelation(product_id, category_id)
+	if err != nil {
+		return false, err
+	}
+
+	if check.ID == 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (s *service) CreateCategoryRelation(input CreateCategoryRelationInput) (CategoryRelation, error) {
+	categoryRelation := CategoryRelation{}
+	categoryRelation.ProductID = input.ProductID
+	categoryRelation.CategoryID = input.CategoryID
+	relation, err := s.repository.CreateCategoryRelation(categoryRelation)
+	if err != nil {
+		return relation, err
+	}
+	return relation, nil
+}
+
+func (s *service) DelCategoryRelation(product_id int, category_id int) (bool, error) {
+	_, err := s.repository.DelCategoryRelation(product_id, category_id)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (s *service) FindCategoryRelation(id int) ([]category.Category, error) {
+	find, err := s.repository.FindCategoryRelation(id)
+	if err != nil {
+		return find, err
+	}
+	return find, nil
 }
 
 // ============ PRODUCT

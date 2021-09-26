@@ -5,28 +5,31 @@ import (
 )
 
 type Product struct {
-	ID          int
-	Name        string
-	Slug        string
-	Bahan       string
-	Price       int
-	Stock       int
-	Active      int
-	Description string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Sliders     []Slider
-	Discounts   []Discount
+	ID                int
+	Name              string
+	Slug              string
+	Bahan             string
+	Price             int
+	Stock             int
+	Active            int
+	Views             int
+	Description       string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	Discounts         []Discount
+	SliderRealtions   []SliderRelation
+	CategoryRelations []CategoryRelation
 }
 
 type Slider struct {
-	ID        int
-	Name      string
-	Filename  string
-	ProductID int
-	IsPrimary int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID              int
+	Name            string
+	Filename        string
+	ProductID       int
+	IsPrimary       int
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	SliderRelations []SliderRelation
 }
 
 type Discount struct {
@@ -44,7 +47,17 @@ type Discount struct {
 }
 
 type CategoryRelation struct {
+	ID         int
+	ProductID  int
 	CategoryID int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+}
+
+type SliderRelation struct {
+	ID        int
+	ProductID int
+	SliderID  int
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

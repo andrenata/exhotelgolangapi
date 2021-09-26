@@ -74,11 +74,13 @@ func (s *service) ChangeDetailService(input ChangeDetailInput) (User, error) {
 		return user, err
 	}
 
-	Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
-	if err != nil {
-		return user, err
+	if input.Password != "" {
+		Password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
+		if err != nil {
+			return user, err
+		}
+		user.Password = string(Password)
 	}
-	user.Password = string(Password)
 
 	user.Name = input.Name
 	user.Email = input.Email

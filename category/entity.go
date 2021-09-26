@@ -11,7 +11,6 @@ type Category struct {
 	ProductID int
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	// CategoryRelations []CategoryRelation
 }
 
 // type CategoryRelation struct {

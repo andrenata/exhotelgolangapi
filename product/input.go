@@ -35,11 +35,11 @@ type FindProductByIdInput struct {
 type CreateProductInput struct {
 	Name        string `json:"name" binding:"required"`
 	Slug        string `json:"slug" binding:"required"`
-	Bahan       string `json:"bahan" binding:"required"`
-	Price       int    `json:"price" binding:"required"`
-	Stock       int    `json:"stock" binding:"required"`
-	Active      int    `json:"active" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Bahan       string `json:"bahan"`
+	Price       int    `json:"price"`
+	Stock       int    `json:"stock"`
+	Active      int    `json:"active"`
+	Description string `json:"description"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -48,11 +48,11 @@ type UpdateProductInput struct {
 	ID          int    `json:"id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Slug        string `json:"slug" binding:"required"`
-	Bahan       string `json:"bahan" binding:"required"`
-	Price       int    `json:"price" binding:"required"`
-	Stock       int    `json:"stock" binding:"required"`
-	Active      int    `json:"active" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Bahan       string `json:"bahan"`
+	Price       int    `json:"price"`
+	Stock       int    `json:"stock"`
+	Active      int    `json:"active"`
+	Description string `json:"description"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -91,4 +91,25 @@ type UpdateDiscountByActiveInput struct {
 
 type DelProductInput struct {
 	ID int `json:"id" binding:"required"`
+}
+
+// SLIDER RELATION
+type CreateSliderRelationInput struct {
+	ProductID int `json:"product_id" binding:"required"`
+	SliderID  int `json:"slider_id" binding:"required"`
+}
+
+type IDSliderRelationInput struct {
+	ID int `json:"id" binding:"required"`
+}
+
+type DelSliderProductInput struct {
+	SliderID  int `json:"slider_id" binding:"required"`
+	ProductID int `json:"product_id" binding:"required"`
+}
+
+// CATEGORY RELATION
+type CreateCategoryRelationInput struct {
+	CategoryID int `json:"category_id" binding:"required"`
+	ProductID  int `json:"product_id" binding:"required"`
 }

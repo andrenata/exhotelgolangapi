@@ -5,7 +5,9 @@ import (
 	"cager/category"
 	"cager/handler"
 	"cager/middleware"
+	"cager/pages"
 	"cager/product"
+	"cager/settings"
 	"cager/user"
 	"log"
 
@@ -27,17 +29,23 @@ func main() {
 	userRepository := user.NewRepository(db)
 	categoryRepository := category.NewRepository(db)
 	productRepository := product.NewRepository(db)
+	pageRepository := pages.NewRepository(db)
+	settingRepository := settings.NewRepository(db)
 
 	// SERVICE
 	userService := user.NewService(userRepository)
 	categoryService := category.NewService(categoryRepository)
 	productService := product.NewService(productRepository)
+	pageService := pages.NewService(pageRepository)
+	settingService := settings.NewService(settingRepository)
 
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService, authService)
 	productHandler := handler.NewProductHandler(productService)
+	pageHandler := handler.NewPageHandler(pageService)
+	settingHandler := handler.NewSettingHandler(settingService)
 
 	router := gin.Default()
 
@@ -46,6 +54,9 @@ func main() {
 	config.AllowHeaders = []string{"Authorization", "Content-Type", "X-CSRF-Token"}
 
 	router.Use(cors.New(config))
+
+	// public routes
+	router.Static("/storage", "./storage")
 
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
@@ -73,13 +84,36 @@ func main() {
 	api.POST("/product/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateProductName)
 	api.POST("/product/update", middleware.AuthMiddleware(authService, userService), productHandler.UpdateProduct)
 	api.POST("/product/del", middleware.AuthMiddleware(authService, userService), productHandler.DelProduct)
+	api.POST("/product/detail", middleware.AuthMiddleware(authService, userService), productHandler.FindProductByIDHandler)
 
 	// SLIDER
+	api.POST("/slider/all", middleware.AuthMiddleware(authService, userService), productHandler.GetAllSliderHanlder)
 	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
 	api.POST("/slider/del", middleware.AuthMiddleware(authService, userService), productHandler.DelSlider)
 
 	// DISCOUNT
 	api.POST("/discount/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateDiscount)
+
+	// SLIDER REALTION
+	api.POST("/sliderrelation/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSliderRelationHandler)
+	api.POST("/sliderrelation/get", middleware.AuthMiddleware(authService, userService), productHandler.GetSliderRelationByProductIDHanlder)
+	api.POST("/sliderrelation/del", middleware.AuthMiddleware(authService, userService), productHandler.DelSliderRelationHanlder)
+
+	// CATEGORY RELATION
+	api.POST("/categoryrelation/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateCategoryRelationHandler)
+	api.POST("/categoryrelation/get", middleware.AuthMiddleware(authService, userService), productHandler.FindCategoryRelationHandler)
+	api.POST("/categoryrelation/del", middleware.AuthMiddleware(authService, userService), productHandler.DelCategoryRelationHandler)
+
+	// PAGES
+	api.POST("/page/all", middleware.AuthMiddleware(authService, userService), pageHandler.FindAllPage)
+	api.POST("/page/create", middleware.AuthMiddleware(authService, userService), pageHandler.CreatePage)
+	api.POST("/page/id", middleware.AuthMiddleware(authService, userService), pageHandler.FindByid)
+	api.POST("/page/del", middleware.AuthMiddleware(authService, userService), pageHandler.DelPage)
+	api.POST("/page/update", middleware.AuthMiddleware(authService, userService), pageHandler.UpdatePage)
+
+	// SETTING
+	api.POST("/setting/find", middleware.AuthMiddleware(authService, userService), settingHandler.FindByid)
+	api.POST("/setting/update", middleware.AuthMiddleware(authService, userService), settingHandler.UpdateSetting)
 
 	router.Run(":8090")
 

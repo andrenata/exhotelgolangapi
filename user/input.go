@@ -20,7 +20,7 @@ type ChangeDetailInput struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Active   int    `json:"active" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Password string `json:"password"`
 }
 
 type CheckEmailInput struct {
