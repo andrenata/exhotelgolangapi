@@ -57,6 +57,7 @@ func main() {
 
 	// public routes
 	router.Static("/storage", "./storage")
+	// router.Use(static.Serve("/storage", static.LocalFile("/storage", false)))
 
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
@@ -88,7 +89,7 @@ func main() {
 
 	// SLIDER
 	api.POST("/slider/all", middleware.AuthMiddleware(authService, userService), productHandler.GetAllSliderHanlder)
-	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
+
 	api.POST("/slider/del", middleware.AuthMiddleware(authService, userService), productHandler.DelSlider)
 
 	// DISCOUNT
@@ -114,6 +115,8 @@ func main() {
 	// SETTING
 	api.POST("/setting/find", middleware.AuthMiddleware(authService, userService), settingHandler.FindByid)
 	api.POST("/setting/update", middleware.AuthMiddleware(authService, userService), settingHandler.UpdateSetting)
+
+	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
 
 	router.Run(":8090")
 

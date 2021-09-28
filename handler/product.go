@@ -340,9 +340,6 @@ func (h *productHandler) UpdateProduct(c *gin.Context) {
 }
 
 func (h *productHandler) CreateSlider(c *gin.Context) {
-	// is_primary set in front end
-	// validation input
-	// create slider
 
 	file, err := c.FormFile("file")
 
