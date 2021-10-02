@@ -1,6 +1,7 @@
 package Routes
 
 import (
+	user "cager/App/User"
 	auth "cager/App/auth"
 	"cager/App/category"
 	handler "cager/App/handler"
@@ -8,7 +9,6 @@ import (
 	"cager/App/pages"
 	product "cager/App/product"
 	"cager/App/settings"
-	"cager/App/user"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
