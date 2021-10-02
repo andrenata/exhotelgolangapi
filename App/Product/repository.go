@@ -1,7 +1,7 @@
-package product
+package Product
 
 import (
-	"cager/category"
+	"cager/App/category"
 
 	"gorm.io/gorm"
 )

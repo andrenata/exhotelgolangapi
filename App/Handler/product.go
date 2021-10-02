@@ -1,9 +1,9 @@
-package handler
+package Handler
 
 import (
-	"cager/category"
-	"cager/helper"
-	"cager/product"
+	"cager/App/category"
+	"cager/App/helper"
+	product "cager/App/product"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

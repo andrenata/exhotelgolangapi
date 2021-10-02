@@ -1,6 +1,8 @@
 package user
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	Save(user User) (User, error)
@@ -32,6 +34,7 @@ func (r *repository) Save(user User) (User, error) {
 func (r *repository) AllUser() ([]User, error) {
 	var users []User
 	err := r.db.Find(&users).Error
+
 	if err != nil {
 		return users, err
 	}

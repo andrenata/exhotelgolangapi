@@ -1,6 +1,6 @@
-package product
+package Product
 
-import "cager/category"
+import "cager/App/category"
 
 type Service interface {
 	FindAllSliderService() ([]Slider, error)
