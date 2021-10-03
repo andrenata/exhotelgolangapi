@@ -6,7 +6,6 @@ type CreateSliderInput struct {
 	Name      string `json:"name" binding:"required"`
 	Filename  string `json:"filename" binding:"required"`
 	ProductID int    `json:"product_id" binding:"required"`
-	IsPrimary int    `json:"is_primary"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -14,7 +13,6 @@ type CreateSliderInput struct {
 type UpdateSliderInput struct {
 	Name      string `json:"slider" binding:"required"`
 	Filename  string `json:"filename" binding:"required"`
-	IsPrimary int    `json:"is_primary" binding:"required"`
 	UpdatedAt time.Time
 }
 
@@ -36,6 +34,7 @@ type CreateProductInput struct {
 	Name        string `json:"name" binding:"required"`
 	Slug        string `json:"slug" binding:"required"`
 	Bahan       string `json:"bahan"`
+	Dimensi     string `json:"dimensi"`
 	Price       int    `json:"price"`
 	Stock       int    `json:"stock"`
 	Active      int    `json:"active"`
@@ -49,6 +48,7 @@ type UpdateProductInput struct {
 	Name        string `json:"name" binding:"required"`
 	Slug        string `json:"slug" binding:"required"`
 	Bahan       string `json:"bahan"`
+	Dimensi     string `json:"dimensi"`
 	Price       int    `json:"price"`
 	Stock       int    `json:"stock"`
 	Active      int    `json:"active"`

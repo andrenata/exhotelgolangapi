@@ -2,7 +2,7 @@ package Handler
 
 import (
 	"cager/App/category"
-	"cager/App/helper"
+	helper "cager/App/helper"
 	product "cager/App/product"
 	"net/http"
 
@@ -174,6 +174,19 @@ func (h *productHandler) CreateProductName(c *gin.Context) {
 // ALL PRODUCT
 func (h *productHandler) GetAllProduct(c *gin.Context) {
 	products, err := h.productService.FindAllProductService()
+	if err != nil {
+		response := helper.APIResponse("Find Products failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatProducts(products)
+	response := helper.APIResponse("Get All Products", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) GetAllProductBest(c *gin.Context) {
+	products, err := h.productService.FindAllProductBestService()
 	if err != nil {
 		response := helper.APIResponse("Find Products failed", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)
@@ -441,4 +454,20 @@ func (h *productHandler) CreateDiscount(c *gin.Context) {
 	response := helper.APIResponse("Discount Created", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 
+}
+
+func (h *productHandler) Pagination(c *gin.Context) {
+	code := http.StatusOK
+
+	pagination := helper.GeneratePaginationRequest(c)
+
+	urlPath := c.Request.URL.Path
+
+	response := h.productService.Pagination(urlPath, pagination)
+
+	if !response.Success {
+		code = http.StatusBadRequest
+	}
+
+	c.JSON(code, response)
 }

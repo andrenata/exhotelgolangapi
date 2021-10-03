@@ -110,5 +110,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
 
+	// FRONTEND
+	api.GET("/front/products", productHandler.GetAllProduct)
+	api.GET("/front/products/best", productHandler.GetAllProductBest)
+	api.GET("/pagination", productHandler.Pagination)
+
 	return router
 }

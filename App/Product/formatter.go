@@ -7,6 +7,7 @@ type ProductFormatter struct {
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
 	Bahan       string `json:"bahan"`
+	Dimensi     string `json:"dimensi"`
 	Price       int    `json:"price"`
 	Stock       int    `json:"stock"`
 	Active      int    `json:"active"`
@@ -20,6 +21,7 @@ func FormatProduct(product Product) ProductFormatter {
 		Name:        product.Name,
 		Slug:        product.Slug,
 		Bahan:       product.Bahan,
+		Dimensi:     product.Dimensi,
 		Price:       product.Price,
 		Stock:       product.Stock,
 		Active:      product.Active,
@@ -43,18 +45,16 @@ func FormatProducts(products []Product) []ProductFormatter {
 
 // SLIDER
 type SliderFormatter struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Filename  string `json:"filename"`
-	IsPrimary int    `json:"is_primary"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Filename string `json:"filename"`
 }
 
 func FormatSlider(slider Slider) SliderFormatter {
 	formatter := SliderFormatter{
-		ID:        slider.ID,
-		Name:      slider.Name,
-		Filename:  slider.Filename,
-		IsPrimary: slider.IsPrimary,
+		ID:       slider.ID,
+		Name:     slider.Name,
+		Filename: slider.Filename,
 	}
 
 	return formatter
@@ -146,4 +146,9 @@ func FormatDiscount(discount Discount) DiscountFormatter {
 	}
 
 	return formatter
+}
+
+type RepositoryResult struct {
+	Result interface{}
+	Error  error
 }

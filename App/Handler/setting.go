@@ -1,7 +1,7 @@
 package Handler
 
 import (
-	"cager/App/helper"
+	helper "cager/App/helper"
 	"cager/App/settings"
 	"net/http"
 

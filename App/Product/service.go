@@ -1,6 +1,10 @@
 package Product
 
-import "cager/App/category"
+import (
+	"cager/App/category"
+	helper "cager/App/helper"
+	"fmt"
+)
 
 type Service interface {
 	FindAllSliderService() ([]Slider, error)
@@ -12,6 +16,7 @@ type Service interface {
 
 	// PRODUCT
 	FindAllProductService() ([]Product, error)
+	FindAllProductBestService() ([]Product, error)
 	FindProductById(id int) (Product, error)
 	FindProductBySlug(slug string) (bool, error)
 	CreateProductService(input CreateProductInput) (Product, error)
@@ -39,6 +44,8 @@ type Service interface {
 	CreateCategoryRelation(input CreateCategoryRelationInput) (CategoryRelation, error)
 	DelCategoryRelation(product_id int, category_id int) (bool, error)
 	FindCategoryRelation(id int) ([]category.Category, error)
+
+	Pagination(url string, pagination *helper.Pagination) helper.ResponsePagination
 }
 
 type service struct {
@@ -78,7 +85,6 @@ func (s *service) UpdateSliderService(id int, input UpdateSliderInput) (Slider, 
 	}
 	slider.Name = input.Name
 	slider.Filename = input.Filename
-	slider.IsPrimary = input.IsPrimary
 
 	update, err := s.repository.UpdateSlider(slider)
 	if err != nil {
@@ -109,21 +115,6 @@ func (s *service) DelSliderService(id int) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func (s *service) UpdateSliderByPostService(idslider int, idproduct int) (Slider, error) {
-	slider, err := s.repository.FindSliderById(idslider)
-	if err != nil {
-		return slider, err
-	}
-
-	slider.ProductID = idproduct
-	update, err := s.repository.UpdateSlider(slider)
-	if err != nil {
-		return update, err
-	}
-
-	return update, nil
 }
 
 // SLIDER RELATION
@@ -236,6 +227,14 @@ func (s *service) FindAllProductService() ([]Product, error) {
 	return products, nil
 }
 
+func (s *service) FindAllProductBestService() ([]Product, error) {
+	Products, err := s.repository.FindAllBest()
+	if err != nil {
+		return Products, err
+	}
+	return Products, nil
+}
+
 func (s *service) FindProductById(id int) (Product, error) {
 	product, err := s.repository.FindById(id)
 	if err != nil {
@@ -262,6 +261,7 @@ func (s *service) CreateProductService(input CreateProductInput) (Product, error
 	product.Name = input.Name
 	product.Slug = input.Slug
 	product.Bahan = input.Bahan
+	product.Dimensi = input.Dimensi
 	product.Price = input.Price
 	product.Stock = input.Stock
 	product.Description = input.Description
@@ -284,6 +284,7 @@ func (s *service) UpdateProductService(input UpdateProductInput) (Product, error
 	product.Name = input.Name
 	product.Slug = input.Slug
 	product.Bahan = input.Bahan
+	product.Dimensi = input.Dimensi
 	product.Price = input.Price
 	product.Stock = input.Stock
 	product.Description = input.Description
@@ -403,4 +404,47 @@ func (s *service) DelDiscountService(id int) (bool, error) {
 	}
 
 	return true, err
+}
+
+// PAGINATION
+func (s *service) Pagination(url string, pagination *helper.Pagination) helper.ResponsePagination {
+
+	operationResult, totalPages := s.repository.Pagination(pagination)
+
+	if operationResult.Error != nil {
+		return helper.ResponsePagination{Success: false, Message: operationResult.Error.Error()}
+	}
+
+	var data = operationResult.Result.(*helper.Pagination)
+
+	// get current url path
+	urlPath := url
+
+	// search query params
+	searchQueryParams := ""
+
+	for _, search := range pagination.Searchs {
+		searchQueryParams += fmt.Sprintf("&%s.%s=%s", search.Column, search.Action, search.Query)
+	}
+
+	// set first & last page pagination response
+	data.FirstPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, 0, pagination.Sort) + searchQueryParams
+	data.LastPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, totalPages, pagination.Sort) + searchQueryParams
+
+	if data.Page > 0 {
+		// set previous page pagination response
+		data.PreviousPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, data.Page-1, pagination.Sort) + searchQueryParams
+	}
+
+	if data.Page < totalPages {
+		// set next page pagination response
+		data.NextPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, data.Page+1, pagination.Sort) + searchQueryParams
+	}
+
+	if data.Page > totalPages {
+		// reset previous page
+		data.PreviousPage = ""
+	}
+
+	return helper.ResponsePagination{Success: true, Data: data}
 }

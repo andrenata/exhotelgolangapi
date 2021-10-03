@@ -2,6 +2,10 @@ package Product
 
 import (
 	"cager/App/category"
+	helper "cager/App/helper"
+	"fmt"
+	"math"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -13,6 +17,7 @@ type Repository interface {
 	// FindByName(name string) (Product, error)
 	FindByActive(active int) (Product, error)
 	FindAll() ([]Product, error)
+	FindAllBest() ([]Product, error)
 	FindProductByCategory(slug string) (Product, error)
 	DelProduct(id int, product Product) (bool, error)
 	FindBySlug(slug string) (Product, error)
@@ -45,6 +50,8 @@ type Repository interface {
 	DelCategoryRelation(product_id int, category_id int) (bool, error)
 	FindCategoryRelation(id int) ([]category.Category, error)
 	CheckCategoryRelation(product_id int, category_id int) (CategoryRelation, error)
+
+	Pagination(pagination *helper.Pagination) (RepositoryResult, int)
 
 	// Category
 	// FindCategoryByProduct(id int) (Category, error)
@@ -117,11 +124,23 @@ func (r *repository) FindByActive(active int) (Product, error) {
 func (r *repository) FindAll() ([]Product, error) {
 	var products []Product
 
-	err := r.db.Preload("Discounts", "discounts.active = 1").Order("id desc").Find(&products).Error
+	err := r.db.Where("active = 1").Order("id desc").Find(&products).Error
 
 	if err != nil {
 		return products, err
 	}
+	return products, nil
+}
+
+func (r *repository) FindAllBest() ([]Product, error) {
+	var products []Product
+
+	err := r.db.Where("active = 1").Order("views desc").Find(&products).Error
+
+	if err != nil {
+		return products, err
+	}
+
 	return products, nil
 }
 
@@ -398,4 +417,92 @@ func (r *repository) DelDiscount(id int) (bool, error) {
 	return true, nil
 }
 
-// CATEGORY
+// PAGINATION
+
+func (r *repository) Pagination(pagination *helper.Pagination) (RepositoryResult, int) {
+	var product []Product
+
+	var totalRows int64
+
+	totalRows, totalPages, fromRow, toRow := 0, 0, 0, 0
+
+	offset := pagination.Page * pagination.Limit
+
+	// get data with limit, offset & order
+	find := r.db.Limit(pagination.Limit).Offset(offset).Order(pagination.Sort)
+
+	// generate where query
+	searchs := pagination.Searchs
+
+	if searchs != nil {
+		for _, value := range searchs {
+			column := value.Column
+			action := value.Action
+			query := value.Query
+
+			switch action {
+			case "equals":
+				whereQuery := fmt.Sprintf("%s = ?", column)
+				find = find.Where(whereQuery, query)
+				break
+			case "contains":
+				whereQuery := fmt.Sprintf("%s LIKE ?", column)
+				find = find.Where(whereQuery, "%"+query+"%")
+				break
+			case "in":
+				whereQuery := fmt.Sprintf("%s IN (?)", column)
+				queryArray := strings.Split(query, ",")
+				find = find.Where(whereQuery, queryArray)
+				break
+
+			}
+		}
+	}
+
+	find = find.Find(&product)
+
+	// has error find data
+	errFind := find.Error
+
+	if errFind != nil {
+		return RepositoryResult{Error: errFind}, totalPages
+	}
+
+	pagination.Rows = product
+
+	// count all data
+	totalRows = int64(totalRows)
+	errCount := r.db.Model(&Product{}).Count(&totalRows).Error
+	// totalRows = int(totalRows)
+
+	if errCount != nil {
+		return RepositoryResult{Error: errCount}, totalPages
+	}
+
+	pagination.TotalRows = totalRows
+
+	// calculate total pages
+	totalPages = int(math.Ceil(float64(totalRows)/float64(pagination.Limit))) - 1
+
+	if pagination.Page == 0 {
+		// set from & to row on first page
+		fromRow = 1
+		toRow = pagination.Limit
+	} else {
+		if pagination.Page <= totalPages {
+			// calculate from & to row
+			fromRow = pagination.Page*pagination.Limit + 1
+			toRow = (pagination.Page + 1) * pagination.Limit
+		}
+	}
+
+	if toRow > int(totalRows) {
+		// set to row with total rows
+		toRow = int(totalRows)
+	}
+
+	pagination.FromRow = fromRow
+	pagination.ToRow = toRow
+
+	return RepositoryResult{Result: pagination}, totalPages
+}

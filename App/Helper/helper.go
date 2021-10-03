@@ -1,4 +1,4 @@
-package helper
+package Helper
 
 import (
 	"github.com/go-playground/validator/v10"
@@ -13,6 +13,12 @@ type Meta struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
 	Status  string `json:"status"`
+}
+
+type ResponsePagination struct {
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 func APIResponse(message string, code int, status string, data interface{}) Response {

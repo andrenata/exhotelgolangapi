@@ -3,7 +3,7 @@ package Handler
 import (
 	auth "cager/App/auth"
 	"cager/App/category"
-	"cager/App/helper"
+	helper "cager/App/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
