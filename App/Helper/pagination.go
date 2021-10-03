@@ -1,7 +1,7 @@
-package Helper
+package helper
 
 type Pagination struct {
-	Limit        int         `json:"limit"`
+	Size         int         `json:"size"`
 	Page         int         `json:"page"`
 	Sort         string      `json:"sort"`
 	TotalRows    int64       `json:"total_rows"`

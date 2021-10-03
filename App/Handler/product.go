@@ -2,7 +2,7 @@ package Handler
 
 import (
 	"cager/App/category"
-	helper "cager/App/helper"
+	"cager/App/helper"
 	product "cager/App/product"
 	"net/http"
 
@@ -456,14 +456,14 @@ func (h *productHandler) CreateDiscount(c *gin.Context) {
 
 }
 
-func (h *productHandler) Pagination(c *gin.Context) {
+func (h *productHandler) ProductPagination(c *gin.Context) {
 	code := http.StatusOK
 
 	pagination := helper.GeneratePaginationRequest(c)
 
 	urlPath := c.Request.URL.Path
 
-	response := h.productService.Pagination(urlPath, pagination)
+	response := h.productService.ProductPaginationService(urlPath, pagination)
 
 	if !response.Success {
 		code = http.StatusBadRequest

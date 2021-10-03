@@ -1,4 +1,4 @@
-package Helper
+package helper
 
 type Search struct {
 	Column string `json:"column"`

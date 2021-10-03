@@ -2,7 +2,7 @@ package Product
 
 import (
 	"cager/App/category"
-	helper "cager/App/helper"
+	"cager/App/helper"
 	"fmt"
 )
 
@@ -45,7 +45,7 @@ type Service interface {
 	DelCategoryRelation(product_id int, category_id int) (bool, error)
 	FindCategoryRelation(id int) ([]category.Category, error)
 
-	Pagination(url string, pagination *helper.Pagination) helper.ResponsePagination
+	ProductPaginationService(url string, pagination *helper.Pagination) helper.ResponsePagination
 }
 
 type service struct {
@@ -407,9 +407,9 @@ func (s *service) DelDiscountService(id int) (bool, error) {
 }
 
 // PAGINATION
-func (s *service) Pagination(url string, pagination *helper.Pagination) helper.ResponsePagination {
+func (s *service) ProductPaginationService(url string, pagination *helper.Pagination) helper.ResponsePagination {
 
-	operationResult, totalPages := s.repository.Pagination(pagination)
+	operationResult, totalPages := s.repository.ProductPagination(pagination)
 
 	if operationResult.Error != nil {
 		return helper.ResponsePagination{Success: false, Message: operationResult.Error.Error()}
@@ -428,17 +428,17 @@ func (s *service) Pagination(url string, pagination *helper.Pagination) helper.R
 	}
 
 	// set first & last page pagination response
-	data.FirstPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, 0, pagination.Sort) + searchQueryParams
-	data.LastPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, totalPages, pagination.Sort) + searchQueryParams
+	data.FirstPage = fmt.Sprintf("%s?size=%d&page=%d&sort=%s", urlPath, pagination.Size, 0, pagination.Sort) + searchQueryParams
+	data.LastPage = fmt.Sprintf("%s?size=%d&page=%d&sort=%s", urlPath, pagination.Size, totalPages, pagination.Sort) + searchQueryParams
 
 	if data.Page > 0 {
 		// set previous page pagination response
-		data.PreviousPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, data.Page-1, pagination.Sort) + searchQueryParams
+		data.PreviousPage = fmt.Sprintf("%s?size=%d&page=%d&sort=%s", urlPath, pagination.Size, data.Page-1, pagination.Sort) + searchQueryParams
 	}
 
 	if data.Page < totalPages {
 		// set next page pagination response
-		data.NextPage = fmt.Sprintf("%s?limit=%d&page=%d&sort=%s", urlPath, pagination.Limit, data.Page+1, pagination.Sort) + searchQueryParams
+		data.NextPage = fmt.Sprintf("%s?size=%d&page=%d&sort=%s", urlPath, pagination.Size, data.Page+1, pagination.Sort) + searchQueryParams
 	}
 
 	if data.Page > totalPages {

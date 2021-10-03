@@ -73,7 +73,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	api.POST("/category/delete", middleware.AuthMiddleware(authService, userService), categoryHandler.DeleteCategory)
 
 	// PRODUCT
-	api.GET("/product", productHandler.GetAllProduct)
+	api.GET("/product", productHandler.ProductPagination)
 	api.POST("/product/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateProductName)
 	api.POST("/product/update", middleware.AuthMiddleware(authService, userService), productHandler.UpdateProduct)
 	api.POST("/product/del", middleware.AuthMiddleware(authService, userService), productHandler.DelProduct)
@@ -111,9 +111,9 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
 
 	// FRONTEND
-	api.GET("/front/products", productHandler.GetAllProduct)
+	api.GET("/front/products", productHandler.ProductPagination)
 	api.GET("/front/products/best", productHandler.GetAllProductBest)
-	api.GET("/pagination", productHandler.Pagination)
+	// api.GET("/pagination", productHandler.Pagination)
 
 	return router
 }

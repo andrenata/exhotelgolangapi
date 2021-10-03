@@ -2,7 +2,7 @@ package Product
 
 import (
 	"cager/App/category"
-	helper "cager/App/helper"
+	"cager/App/helper"
 	"fmt"
 	"math"
 	"strings"
@@ -51,7 +51,7 @@ type Repository interface {
 	FindCategoryRelation(id int) ([]category.Category, error)
 	CheckCategoryRelation(product_id int, category_id int) (CategoryRelation, error)
 
-	Pagination(pagination *helper.Pagination) (RepositoryResult, int)
+	ProductPagination(pagination *helper.Pagination) (RepositoryResult, int)
 
 	// Category
 	// FindCategoryByProduct(id int) (Category, error)
@@ -419,17 +419,17 @@ func (r *repository) DelDiscount(id int) (bool, error) {
 
 // PAGINATION
 
-func (r *repository) Pagination(pagination *helper.Pagination) (RepositoryResult, int) {
+func (r *repository) ProductPagination(pagination *helper.Pagination) (RepositoryResult, int) {
 	var product []Product
 
 	var totalRows int64
 
 	totalRows, totalPages, fromRow, toRow := 0, 0, 0, 0
 
-	offset := pagination.Page * pagination.Limit
+	offset := pagination.Page * pagination.Size
 
 	// get data with limit, offset & order
-	find := r.db.Limit(pagination.Limit).Offset(offset).Order(pagination.Sort)
+	find := r.db.Limit(pagination.Size).Offset(offset).Order(pagination.Sort)
 
 	// generate where query
 	searchs := pagination.Searchs
@@ -464,7 +464,7 @@ func (r *repository) Pagination(pagination *helper.Pagination) (RepositoryResult
 	// has error find data
 	errFind := find.Error
 
-	if errFind != nil {
+	if find != nil {
 		return RepositoryResult{Error: errFind}, totalPages
 	}
 
@@ -482,17 +482,17 @@ func (r *repository) Pagination(pagination *helper.Pagination) (RepositoryResult
 	pagination.TotalRows = totalRows
 
 	// calculate total pages
-	totalPages = int(math.Ceil(float64(totalRows)/float64(pagination.Limit))) - 1
+	totalPages = int(math.Ceil(float64(totalRows)/float64(pagination.Size))) - 1
 
 	if pagination.Page == 0 {
 		// set from & to row on first page
 		fromRow = 1
-		toRow = pagination.Limit
+		toRow = pagination.Size
 	} else {
 		if pagination.Page <= totalPages {
 			// calculate from & to row
-			fromRow = pagination.Page*pagination.Limit + 1
-			toRow = (pagination.Page + 1) * pagination.Limit
+			fromRow = pagination.Page*pagination.Size + 1
+			toRow = (pagination.Page + 1) * pagination.Size
 		}
 	}
 

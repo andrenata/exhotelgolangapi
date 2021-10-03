@@ -1,4 +1,4 @@
-package Helper
+package helper
 
 import (
 	"strconv"
@@ -8,8 +8,8 @@ import (
 )
 
 func GeneratePaginationRequest(context *gin.Context) *Pagination {
-	// default limit, page & sort parameter
-	limit := 10
+	// default size, page & sort parameter
+	size := 10
 	page := 1
 	sort := "created_at desc"
 
@@ -21,8 +21,8 @@ func GeneratePaginationRequest(context *gin.Context) *Pagination {
 		queryValue := value[len(value)-1]
 
 		switch key {
-		case "limit":
-			limit, _ = strconv.Atoi(queryValue)
+		case "size":
+			size, _ = strconv.Atoi(queryValue)
 			break
 		case "page":
 			page, _ = strconv.Atoi(queryValue)
@@ -45,5 +45,5 @@ func GeneratePaginationRequest(context *gin.Context) *Pagination {
 		}
 	}
 
-	return &Pagination{Limit: limit, Page: page, Sort: sort, Searchs: searchs}
+	return &Pagination{Size: size, Page: page, Sort: sort, Searchs: searchs}
 }
