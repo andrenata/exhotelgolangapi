@@ -1,8 +1,9 @@
-package Product
+package product
 
 import (
-	"cager/App/category"
-	"cager/App/helper"
+	"cager/category"
+	"cager/helper"
+
 	"fmt"
 	"math"
 	"strings"
@@ -138,7 +139,7 @@ func (r *repository) FindAllBest() ([]Product, error) {
 	err := r.db.Where("active = 1").Order("views desc").Find(&products).Error
 
 	if err != nil {
-		return products, err
+					return products, err
 	}
 
 	return products, nil
@@ -420,7 +421,7 @@ func (r *repository) DelDiscount(id int) (bool, error) {
 // PAGINATION
 
 func (r *repository) ProductPagination(pagination *helper.Pagination) (RepositoryResult, int) {
-	var product []Product
+	var products []Product
 
 	var totalRows int64
 
@@ -459,7 +460,7 @@ func (r *repository) ProductPagination(pagination *helper.Pagination) (Repositor
 		}
 	}
 
-	find = find.Find(&product)
+	find = find.Find(&products)
 
 	// has error find data
 	errFind := find.Error
@@ -468,11 +469,11 @@ func (r *repository) ProductPagination(pagination *helper.Pagination) (Repositor
 		return RepositoryResult{Error: errFind}, totalPages
 	}
 
-	pagination.Rows = product
+	pagination.Rows = products
 
 	// count all data
 	totalRows = int64(totalRows)
-	errCount := r.db.Model(&Product{}).Count(&totalRows).Error
+	errCount := r.db.Find(&products).Count(&totalRows).Error
 	// totalRows = int(totalRows)
 
 	if errCount != nil {

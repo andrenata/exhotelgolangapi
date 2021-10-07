@@ -1,14 +1,15 @@
 package Routes
 
 import (
-	user "cager/App/User"
-	auth "cager/App/auth"
-	"cager/App/category"
-	handler "cager/App/handler"
-	middleware "cager/App/middleware"
-	"cager/App/pages"
-	product "cager/App/product"
-	"cager/App/settings"
+	"cager/auth"
+	"cager/category"
+	"cager/handler"
+	"cager/middleware"
+	"cager/pages"
+	"cager/product"
+	"cager/user"
+
+	"cager/settings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -73,7 +74,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	api.POST("/category/delete", middleware.AuthMiddleware(authService, userService), categoryHandler.DeleteCategory)
 
 	// PRODUCT
-	api.GET("/product", productHandler.ProductPagination)
+	api.GET("/product", productHandler.GetAllProduct)
 	api.POST("/product/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateProductName)
 	api.POST("/product/update", middleware.AuthMiddleware(authService, userService), productHandler.UpdateProduct)
 	api.POST("/product/del", middleware.AuthMiddleware(authService, userService), productHandler.DelProduct)

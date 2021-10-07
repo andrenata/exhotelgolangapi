@@ -1,9 +1,9 @@
-package Handler
+package handler
 
 import (
-	user "cager/App/User"
-	auth "cager/App/auth"
-	"cager/App/helper"
+	"cager/auth"
+	"cager/helper"
+	"cager/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

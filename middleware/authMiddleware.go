@@ -1,9 +1,9 @@
-package Middleware
+package middleware
 
 import (
-	user "cager/App/User"
-	auth "cager/App/auth"
-	"cager/App/helper"
+	"cager/auth"
+	"cager/helper"
+	"cager/user"
 	"net/http"
 	"strings"
 

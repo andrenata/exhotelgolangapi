@@ -2,12 +2,46 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a7a054ca-db51-4e15-82e5-d99f15da3ae1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/exhotel.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/product.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/product.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Auth/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Category/entity.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Category/formatter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Category/input.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Category/repository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Category/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Handler/category.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Handler/page.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Handler/product.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Handler/setting.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Handler/user.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Helper/GeneratePaginationRequest.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Helper/helper.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Helper/pagination.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Helper/search.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Middleware/approveBalance.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Middleware/authMiddleware.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Middleware/loadStorage.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Pages/entity.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Pages/formatter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Pages/input.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Pages/repository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Pages/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Product/entity.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Product/formatter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Product/input.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Product/repository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Product/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Settings/entity.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Settings/formatter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Settings/input.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Settings/repository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Settings/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/user/entity.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/user/formatter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/user/input.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/user/repository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/user/service.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Routes/Router.go" beforeDir="false" afterPath="$PROJECT_DIR$/Routes/Router.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,16 +67,34 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
   <component name="WindowStateProjectService">
+    <state x="440" y="64" key="#GOPATH" timestamp="1633596833933">
+      <screen x="0" y="22" width="1280" height="753" />
+    </state>
+    <state x="440" y="64" key="#GOPATH/0.22.1280.753@0.22.1280.753" timestamp="1633596833933" />
+    <state x="440" y="239" key="#Go_Modules" timestamp="1633596829091">
+      <screen x="0" y="22" width="1280" height="753" />
+    </state>
+    <state x="440" y="239" key="#Go_Modules/0.22.1280.753@0.22.1280.753" timestamp="1633596829091" />
     <state x="141" y="38" key="SettingsEditor" timestamp="1631853746228">
       <screen x="0" y="22" width="1280" height="753" />
     </state>

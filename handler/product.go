@@ -1,9 +1,9 @@
-package Handler
+package handler
 
 import (
-	"cager/App/category"
-	"cager/App/helper"
-	product "cager/App/product"
+	"cager/category"
+	"cager/helper"
+	"cager/product"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -173,6 +173,7 @@ func (h *productHandler) CreateProductName(c *gin.Context) {
 
 // ALL PRODUCT
 func (h *productHandler) GetAllProduct(c *gin.Context) {
+
 	products, err := h.productService.FindAllProductService()
 	if err != nil {
 		response := helper.APIResponse("Find Products failed", http.StatusBadRequest, "error", err)

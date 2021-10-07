@@ -52,7 +52,6 @@ func (s *service) GetCategoryBySlug(input GetCategorySlugInput) (Category, error
 func (s *service) RegisterCategory(input RegisterCategoryInput) (Category, error) {
 	category := Category{}
 	category.Name = input.Name
-	category.ProductID = 0
 	category.Slug = strings.ReplaceAll(strings.ToLower(input.Name), " ", "-")
 
 	find, err := s.repository.FindBySlug(category.Slug)

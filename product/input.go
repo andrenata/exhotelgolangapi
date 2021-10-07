@@ -1,4 +1,4 @@
-package Product
+package product
 
 import "time"
 
@@ -30,6 +30,13 @@ type FindProductByIdInput struct {
 }
 
 // ============= PRODUCT
+type AllProductInput struct {
+	Page      int    `json:"page"`
+	Size      int    `json:"size"`
+	Sort      string `json:"sort"`
+	Direction string `json:"direction"`
+}
+
 type CreateProductInput struct {
 	Name        string `json:"name" binding:"required"`
 	Slug        string `json:"slug" binding:"required"`

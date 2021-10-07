@@ -1,8 +1,9 @@
-package Product
+package product
 
 import (
-	"cager/App/category"
-	"cager/App/helper"
+	"cager/category"
+	"cager/helper"
+
 	"fmt"
 )
 
