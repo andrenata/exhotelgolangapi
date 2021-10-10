@@ -22,7 +22,7 @@ func main() {
 	db, err := gorm.Open(postgres.Open(Config.DbURL(Config.BuildDBConfig())), &gorm.Config{})
 
 	if err != nil {
-		fmt.Println("Status:", err)
+		fmt.Println("Status DB:", err)
 	}
 
 	db.AutoMigrate(

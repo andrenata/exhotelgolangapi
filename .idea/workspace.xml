@@ -2,37 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a7a054ca-db51-4e15-82e5-d99f15da3ae1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/storage/Screen Shot 2021-10-04 at 14.41.49.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/Screen Shot 2021-10-09 at 12.58.40.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/banner.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/beli furniture online.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/coba saja.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/page__en_us_15838958240.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/screencapture-localhost-8080-products-2021-10-04-10_55_18.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/testtestdfvdfv.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/Page.go" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Page.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/Product.go" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Product.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/Setting.go" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Setting.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Models/SliderRelation.go" beforeDir="false" afterPath="$PROJECT_DIR$/Models/SliderRelation.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Routes/Router.go" beforeDir="false" afterPath="$PROJECT_DIR$/Routes/Router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/product.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/product.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/setting.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/setting.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/helper.go" beforeDir="false" afterPath="$PROJECT_DIR$/helper/helper.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/pages/entity.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/formatter.go" beforeDir="false" afterPath="$PROJECT_DIR$/pages/formatter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/input.go" beforeDir="false" afterPath="$PROJECT_DIR$/pages/input.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/pages/service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/entity.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/formatter.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/formatter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/input.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/input.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/settings/entity.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/formatter.go" beforeDir="false" afterPath="$PROJECT_DIR$/settings/formatter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/input.go" beforeDir="false" afterPath="$PROJECT_DIR$/settings/input.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/settings/service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
