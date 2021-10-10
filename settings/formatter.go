@@ -8,8 +8,12 @@ type SettingFormatter struct {
 	Facebook    string `json:"facebook"`
 	Instagram   string `json:"instagram"`
 	Maps        string `json:"maps"`
+	MapsLink        string `json:"maps_link"`
 	Address     string `json:"address"`
 	Phone       string `json:"phone"`
+	Email       string `json:"email"`
+	Welcome       string `json:"welcome"`
+	Banner       string `json:"banner"`
 }
 
 func FormatSetting(setting Setting) SettingFormatter {
@@ -23,6 +27,10 @@ func FormatSetting(setting Setting) SettingFormatter {
 		Maps:        setting.Maps,
 		Address:     setting.Address,
 		Phone:       setting.Phone,
+		MapsLink:       setting.MapsLink,
+		Email:       setting.Email,
+		Welcome:       setting.Welcome,
+		Banner:       setting.Banner,
 	}
 	return formatter
 }

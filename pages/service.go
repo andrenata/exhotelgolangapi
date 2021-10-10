@@ -43,7 +43,7 @@ func (s *service) FindBySlug(slug string) (Page, error) {
 
 func (s *service) CreatePage(input CreatePageInput) (Page, error) {
 	page := Page{}
-	page.Title = input.Title
+	page.Name = input.Name
 	page.Slug = input.Slug
 	page.Description = input.Description
 
@@ -61,7 +61,7 @@ func (s *service) UpdatePage(input UpdatePageInput) (Page, error) {
 		return page, err
 	}
 
-	page.Title = input.Title
+	page.Name = input.Name
 	page.Slug = input.Slug
 	page.Description = input.Description
 

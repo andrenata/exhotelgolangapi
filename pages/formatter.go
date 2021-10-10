@@ -2,7 +2,7 @@ package pages
 
 type PageFormatter struct {
 	ID          int    `json:"id"`
-	Title       string `json:"title"`
+	Name       string `json:"name"`
 	Slug        string `json:"slug"`
 	Description string `json:"description"`
 }
@@ -10,7 +10,7 @@ type PageFormatter struct {
 func FormatPage(page Page) PageFormatter {
 	formatter := PageFormatter{
 		ID:          page.ID,
-		Title:       page.Title,
+		Name:       page.Name,
 		Slug:        page.Slug,
 		Description: page.Description,
 	}

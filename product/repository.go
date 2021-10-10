@@ -1,6 +1,7 @@
 package product
 
 import (
+	"cager/Models"
 	"cager/category"
 	"cager/helper"
 
@@ -17,11 +18,12 @@ type Repository interface {
 	FindById(id int) (Product, error)
 	// FindByName(name string) (Product, error)
 	FindByActive(active int) (Product, error)
-	FindAll() ([]Product, error)
+	FindAll(input PaginationInput) ([]Product, int64)
 	FindAllBest() ([]Product, error)
 	FindProductByCategory(slug string) (Product, error)
 	DelProduct(id int, product Product) (bool, error)
 	FindBySlug(slug string) (Product, error)
+	GetSliderRelationByProductSlug(slug string) ([]Slider, error)
 
 	// SLIDER
 	FindAllSlider() ([]Slider, error)
@@ -53,6 +55,9 @@ type Repository interface {
 	CheckCategoryRelation(product_id int, category_id int) (CategoryRelation, error)
 
 	ProductPagination(pagination *helper.Pagination) (RepositoryResult, int)
+
+	//FRONT END
+	FrontFindProductByCateg(input PaginationProductCategInput) ([]Product, int64)
 
 	// Category
 	// FindCategoryByProduct(id int) (Category, error)
@@ -122,15 +127,73 @@ func (r *repository) FindByActive(active int) (Product, error) {
 	return product, nil
 }
 
-func (r *repository) FindAll() ([]Product, error) {
+func (r *repository) FrontFindProductByCateg(input PaginationProductCategInput) ([]Product, int64) {
 	var products []Product
+	totalRows := 0
+	total := int64(totalRows)
 
-	err := r.db.Where("active = 1").Order("id desc").Find(&products).Error
-
+	//query
+	offset := input.Page * input.Size
+	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort+" "+input.Direction)
+	find = find.Joins("JOIN category_relations ON products.id = category_relations.product_id").
+		Joins("JOIN categories ON category_relations.category_id = categories.id").
+		Where("categories.slug = ?", input.Slug).
+		Where("products.active = ?", 1).
+		Find(&products)
+	err := find.Error
 	if err != nil {
-		return products, err
+		return products, total
 	}
-	return products, nil
+
+	data := products
+
+	// count all data
+	err = r.db.Joins("JOIN category_relations ON products.id = category_relations.product_id").
+		Joins("JOIN categories ON category_relations.category_id = categories.id").
+		Where("categories.slug = ?", input.Slug).
+		Where("products.active = ?", 1).
+		Find(&products).Count(&total).Error
+	if err != nil {
+		return data, total
+	}
+
+	return data, total
+}
+
+func (r *repository) FindAll(input PaginationInput) ([]Product, int64) {
+	var products []Product
+	totalRows := 0
+	total := int64(totalRows)
+
+	//query
+	offset := input.Page * input.Size
+	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort+" "+input.Direction)
+
+	if input.Active == 1 {
+		find = find.Where("active = ?", 1).Find(&products)
+	}
+	if input.Active == 0 {
+		find = find.Find(&products)
+	}
+	err := find.Error
+	if err != nil {
+		return products, total
+	}
+
+	data := products
+
+	// count all data
+	if input.Active == 1 {
+		err = r.db.Where("active = ?", 1).Find(&products).Count(&total).Error
+	}
+	if input.Active == 0 {
+		err = r.db.Find(&products).Count(&total).Error
+	}
+	if err != nil {
+		return data, total
+	}
+
+	return data, total
 }
 
 func (r *repository) FindAllBest() ([]Product, error) {
@@ -139,7 +202,7 @@ func (r *repository) FindAllBest() ([]Product, error) {
 	err := r.db.Where("active = 1").Order("views desc").Find(&products).Error
 
 	if err != nil {
-					return products, err
+		return products, err
 	}
 
 	return products, nil
@@ -148,7 +211,8 @@ func (r *repository) FindAllBest() ([]Product, error) {
 func (r *repository) FindProductByCategory(slug string) (Product, error) {
 	var product Product
 
-	err := r.db.Joins("JOIN categories ON categories.product_id = product.id").Where("categories.slug = ?", slug).Find(&product).Error
+	err := r.db.Joins("JOIN categories ON categories.product_id = product.id").
+		Where("categories.slug = ?", slug).Find(&product).Error
 
 	if err != nil {
 		return product, err
@@ -317,6 +381,23 @@ func (r *repository) GetSliderRelationByProductID(id int) ([]Slider, error) {
 	return sliders, nil
 }
 
+func (r *repository) GetSliderRelationByProductSlug(slug string) ([]Slider, error) {
+	var sliders []Slider
+
+	err := r.db.Table("sliders").
+		Joins("JOIN slider_relations ON sliders.id = slider_relations.slider_id").
+		Joins("JOIN products ON slider_relations.product_id = products.id").
+		Where("products.slug = ?", slug).
+		Order("sliders.id desc").
+		Find(&sliders).Error
+
+	if err != nil {
+		return sliders, err
+	}
+
+	return sliders, nil
+}
+
 func (r *repository) GetSliderRelationByID(id int) (SliderRelation, error) {
 	var sliderRelation SliderRelation
 
@@ -421,7 +502,7 @@ func (r *repository) DelDiscount(id int) (bool, error) {
 // PAGINATION
 
 func (r *repository) ProductPagination(pagination *helper.Pagination) (RepositoryResult, int) {
-	var products []Product
+	var products []Models.Product
 
 	var totalRows int64
 
@@ -461,21 +542,15 @@ func (r *repository) ProductPagination(pagination *helper.Pagination) (Repositor
 	}
 
 	find = find.Find(&products)
-
-	// has error find data
 	errFind := find.Error
-
 	if find != nil {
 		return RepositoryResult{Error: errFind}, totalPages
 	}
-
 	pagination.Rows = products
 
 	// count all data
 	totalRows = int64(totalRows)
 	errCount := r.db.Find(&products).Count(&totalRows).Error
-	// totalRows = int(totalRows)
-
 	if errCount != nil {
 		return RepositoryResult{Error: errCount}, totalPages
 	}

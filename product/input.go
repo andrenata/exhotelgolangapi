@@ -30,11 +30,25 @@ type FindProductByIdInput struct {
 }
 
 // ============= PRODUCT
-type AllProductInput struct {
+type PaginationInput struct {
 	Page      int    `json:"page"`
 	Size      int    `json:"size"`
 	Sort      string `json:"sort"`
 	Direction string `json:"direction"`
+	Active 	int `json:"active"`
+}
+
+type PaginationProductCategInput struct {
+	Page      int    `json:"page"`
+	Size      int    `json:"size"`
+	Sort      string `json:"sort"`
+	Direction string `json:"direction"`
+	Slug string `json:"slug"`
+}
+
+type UpdateThumbProductInput struct {
+	ID int `json:"id"`
+	Thumbnail string `json:"thumbnail"`
 }
 
 type CreateProductInput struct {
@@ -77,7 +91,12 @@ type CreateProductByName struct {
 }
 
 type FindBySlugInput struct {
-	Slug string `json:"slug" binding:"requred"`
+	Slug string `json:"slug" binding:"required"`
+}
+
+type UpdateViewsInput struct {
+	ID int `json:"id" binding:"required"`
+	Views int `json:"views" binding:"required"`
 }
 
 // DISCOUNT

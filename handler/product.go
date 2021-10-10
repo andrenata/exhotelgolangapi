@@ -82,6 +82,31 @@ func (h *productHandler) GetSliderRelationByProductIDHanlder(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *productHandler) GetSliderRelationByProductSlugHanlder(c *gin.Context) {
+	var input product.FindBySlugInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	sliderRelation, err := h.productService.GetSliderRelationBySlugProductService(input.Slug)
+	if err != nil {
+		response := helper.APIResponse("Get Slider failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatSliders(sliderRelation)
+	response := helper.APIResponse("Get Slider", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *productHandler) GetSliderRelationByIDHanlder(c *gin.Context) {
 	var input product.IDSliderRelationInput
 
@@ -174,15 +199,38 @@ func (h *productHandler) CreateProductName(c *gin.Context) {
 // ALL PRODUCT
 func (h *productHandler) GetAllProduct(c *gin.Context) {
 
-	products, err := h.productService.FindAllProductService()
+	var input product.PaginationInput
+	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		response := helper.APIResponse("Find Products failed", http.StatusBadRequest, "error", err)
-		c.JSON(http.StatusBadRequest, response)
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Pagination Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
 
+	products, total := h.productService.FindAllProductService(input)
+
 	formatter := product.FormatProducts(products)
-	response := helper.APIResponse("Get All Products", http.StatusOK, "success", formatter)
+	response := helper.APIPagination("Get All Products", http.StatusOK, "success", total, formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) GetProductByCateg(c *gin.Context) {
+	var input product.PaginationProductCategInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Pagination Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	products, total := h.productService.FindProductByCategService(input)
+
+	formatter := product.FormatProducts(products)
+	response := helper.APIPagination("Get All Products", http.StatusOK, "success", total, formatter)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -199,6 +247,28 @@ func (h *productHandler) GetAllProductBest(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *productHandler) UpdateViewsProductHanlder(c *gin.Context) {
+	var input product.UpdateViewsInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	err = h.productService.UpdateViewsProduct(input.ID, input.Views)
+	if err != nil {
+		response := helper.APIResponse("Update Products failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	response := helper.APIResponse("Get All Products", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}
+
 func (h *productHandler) FindProductByIDHandler(c *gin.Context) {
 	var input product.FindProductByIdInput
 
@@ -213,6 +283,31 @@ func (h *productHandler) FindProductByIDHandler(c *gin.Context) {
 	}
 
 	find, err := h.productService.FindProductById(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Find Product failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := product.FormatProduct(find)
+	response := helper.APIResponse("Get Product", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) FindProductBySlugHandler(c *gin.Context) {
+	var input product.FindBySlugInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Product Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	find, err := h.productService.DetailProductBySlug(input.Slug)
 	if err != nil {
 		response := helper.APIResponse("Find Product failed", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)
@@ -342,6 +437,31 @@ func (h *productHandler) UpdateProduct(c *gin.Context) {
 	}
 
 	_, err = h.productService.UpdateProductService(input)
+	if err != nil {
+		response := helper.APIResponse("Update Products failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Product Update", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *productHandler) UpdateThumbProduct(c *gin.Context) {
+	var input product.UpdateThumbProductInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Product Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	_, err = h.productService.UpdateThumbProductService(input)
 	if err != nil {
 		response := helper.APIResponse("Update Products failed", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, response)

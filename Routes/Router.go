@@ -7,9 +7,8 @@ import (
 	"cager/middleware"
 	"cager/pages"
 	"cager/product"
-	"cager/user"
-
 	"cager/settings"
+	"cager/user"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -49,8 +48,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	router.Use(cors.New(config))
 
 	// public routes
-	router.Static("/storage", "../Storage")
-	// router.Use(static.Serve("/storage", static.LocalFile("/storage", false)))
+	router.Static("/storage", "./storage")
+	//router.Use(static.Serve("/storage", static.LocalFile("/storage", false)))
 
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
@@ -74,9 +73,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	api.POST("/category/delete", middleware.AuthMiddleware(authService, userService), categoryHandler.DeleteCategory)
 
 	// PRODUCT
-	api.GET("/product", productHandler.GetAllProduct)
+	api.POST("/product", middleware.AuthMiddleware(authService, userService), productHandler.GetAllProduct)
 	api.POST("/product/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateProductName)
 	api.POST("/product/update", middleware.AuthMiddleware(authService, userService), productHandler.UpdateProduct)
+	api.POST("/product/thumb", middleware.AuthMiddleware(authService, userService), productHandler.UpdateThumbProduct)
 	api.POST("/product/del", middleware.AuthMiddleware(authService, userService), productHandler.DelProduct)
 	api.POST("/product/detail", middleware.AuthMiddleware(authService, userService), productHandler.FindProductByIDHandler)
 
@@ -108,12 +108,21 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	// SETTING
 	api.POST("/setting/find", middleware.AuthMiddleware(authService, userService), settingHandler.FindByid)
 	api.POST("/setting/update", middleware.AuthMiddleware(authService, userService), settingHandler.UpdateSetting)
+	api.POST("/setting/update/banner", middleware.AuthMiddleware(authService, userService), settingHandler.UpdateBannerSetting)
 
 	api.POST("/slider/create", middleware.AuthMiddleware(authService, userService), productHandler.CreateSlider)
 
 	// FRONTEND
-	api.GET("/front/products", productHandler.ProductPagination)
-	api.GET("/front/products/best", productHandler.GetAllProductBest)
+	api.POST("/front/products", productHandler.GetAllProduct)
+	api.POST("/front/products/best", productHandler.GetAllProduct)
+	api.POST("/front/product/categ", productHandler.GetProductByCateg)
+	api.POST("/front/contact", settingHandler.FindByid)
+	api.POST("/front/product/detail", productHandler.FindProductBySlugHandler)
+	api.POST("/front/page/slug", pageHandler.FindBySlug)
+	api.POST("/front/product/count/views", productHandler.UpdateViewsProductHanlder)
+	api.POST("/front/product/slider", productHandler.GetSliderRelationByProductSlugHanlder)
+	api.POST("/front/categories", categoryHandler.GetAllCategory)
+	api.POST("/front/settings", settingHandler.FindByid)
 	// api.GET("/pagination", productHandler.Pagination)
 
 	return router

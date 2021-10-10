@@ -12,8 +12,12 @@ type Setting struct {
 	Facebook    string `json:"facebook"`
 	Instagram   string `json:"instagram"`
 	Maps        string `json:"maps"`
+	MapsLink  string `json:"maps_link"`
 	Address     string `json:"address"`
 	Phone       string `json:"phone"`
+	Email       string `json:"email"`
+	Welcome     string `json:"welcome"`
+	Banner     string `json:"banner"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

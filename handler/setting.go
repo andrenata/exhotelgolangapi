@@ -16,6 +16,35 @@ func NewSettingHandler(settingService settings.Service) *settingHandler {
 	return &settingHandler{settingService}
 }
 
+func (h *settingHandler) UpdateBannerSetting(c *gin.Context) {
+
+	file, err := c.FormFile("banner")
+
+	if err != nil {
+		response := helper.APIResponse("Upload Banner Failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	path := "storage/" + file.Filename
+	if err := c.SaveUploadedFile(file, path); err != nil {
+		response := helper.APIResponse("Upload Banner Failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.settingService.UpdateBannerSetting(file.Filename)
+
+	if err != nil {
+		response := helper.APIResponse("Update failed", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Updated", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *settingHandler) UpdateSetting(c *gin.Context) {
 
 	var input settings.UpdateSettingInput

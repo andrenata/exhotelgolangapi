@@ -4,7 +4,7 @@ import "time"
 
 type Page struct {
 	ID          int
-	Title       string
+	Name       string
 	Slug        string
 	Description string
 	CreatedAt   time.Time

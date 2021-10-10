@@ -10,8 +10,12 @@ type Setting struct {
 	Facebook    string
 	Instagram   string
 	Maps        string
+	MapsLink        string
 	Address     string
 	Phone       string
+	Email       string
+	Welcome       string
+	Banner       string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

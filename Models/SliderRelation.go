@@ -16,5 +16,5 @@ type SliderRelation struct {
 }
 
 func (b *SliderRelation) TableName() string {
-	return "slder_relations"
+	return "slider_relations"
 }

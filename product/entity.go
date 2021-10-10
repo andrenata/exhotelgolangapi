@@ -9,6 +9,7 @@ type Product struct {
 	Name             string             `json:"name"`
 	Slug             string             `json:"slug"`
 	Bahan            string             `json:"bahan"`
+	Thumbnail        string             `json:"thumbnail"`
 	Dimensi          string             `json:"dimensi"`
 	Price            int                `json:"price"`
 	Stock            int                `json:"stock"`

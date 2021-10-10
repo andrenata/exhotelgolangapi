@@ -3,7 +3,6 @@ package product
 import (
 	"cager/category"
 	"cager/helper"
-
 	"fmt"
 )
 
@@ -16,15 +15,19 @@ type Service interface {
 	DelSliderService(id int) (bool, error)
 
 	// PRODUCT
-	FindAllProductService() ([]Product, error)
+	FindAllProductService(input PaginationInput) ([]Product, int64)
 	FindAllProductBestService() ([]Product, error)
 	FindProductById(id int) (Product, error)
 	FindProductBySlug(slug string) (bool, error)
+	DetailProductBySlug(slug string) (Product, error)
 	CreateProductService(input CreateProductInput) (Product, error)
 	UpdateProductService(input UpdateProductInput) (Product, error)
 	DelProductService(id int) (bool, error)
 	UpdateProductByActiveService(id int, input UpdateProductByActiveInput) (Product, error)
 	CreateProductByName(input CreateProductByName) (Product, error)
+
+	UpdateThumbProductService(input UpdateThumbProductInput) (Product, error)
+	GetSliderRelationBySlugProductService(slug string) ([]Slider, error)
 
 	// DISCOUNT
 	// FindAllDiscountService() ([]Discount, error)
@@ -47,6 +50,10 @@ type Service interface {
 	FindCategoryRelation(id int) ([]category.Category, error)
 
 	ProductPaginationService(url string, pagination *helper.Pagination) helper.ResponsePagination
+
+	//FRONT END
+	FindProductByCategService(input PaginationProductCategInput) ([]Product, int64)
+	UpdateViewsProduct(id int, views int) error
 }
 
 type service struct {
@@ -55,6 +62,20 @@ type service struct {
 
 func NewService(repository Repository) *service {
 	return &service{repository}
+}
+
+func (s *service) UpdateViewsProduct(id int, views int) error {
+	product, err := s.repository.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	product.Views = product.Views + views
+	_, err = s.repository.Update(product)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *service) FindAllSliderService() ([]Slider, error) {
@@ -157,6 +178,14 @@ func (s *service) GetSliderRelationByIDProductService(id int) ([]Slider, error) 
 	return sliderRelation, nil
 }
 
+func (s *service) GetSliderRelationBySlugProductService(slug string) ([]Slider, error) {
+	sliderRelation, err := s.repository.GetSliderRelationByProductSlug(slug)
+	if err != nil {
+		return sliderRelation, err
+	}
+	return sliderRelation, nil
+}
+
 func (s *service) GetSliderRelationByIDService(id int) (SliderRelation, error) {
 	sliderRelation, err := s.repository.GetSliderRelationByID(id)
 	if err != nil {
@@ -220,12 +249,20 @@ func (s *service) CreateProductByName(input CreateProductByName) (Product, error
 	return create, nil
 }
 
-func (s *service) FindAllProductService() ([]Product, error) {
-	products, err := s.repository.FindAll()
-	if err != nil {
-		return products, err
+func (s *service) FindAllProductService(input PaginationInput) ([]Product, int64) {
+	products, total := s.repository.FindAll(input)
+	if total != 0 {
+		return products, total
 	}
-	return products, nil
+	return products, total
+}
+
+func (s *service) FindProductByCategService(input PaginationProductCategInput) ([]Product, int64) {
+	products, total := s.repository.FrontFindProductByCateg(input)
+	if total != 0 {
+		return products, total
+	}
+	return products, total
 }
 
 func (s *service) FindAllProductBestService() ([]Product, error) {
@@ -255,6 +292,15 @@ func (s *service) FindProductBySlug(slug string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (s *service) DetailProductBySlug(slug string) (Product, error) {
+	product, err := s.repository.FindBySlug(slug)
+	if err != nil {
+		return product, err
+	}
+
+	return product, nil
 }
 
 func (s *service) CreateProductService(input CreateProductInput) (Product, error) {
@@ -290,6 +336,22 @@ func (s *service) UpdateProductService(input UpdateProductInput) (Product, error
 	product.Stock = input.Stock
 	product.Description = input.Description
 	product.Active = input.Active
+
+	update, err := s.repository.Update(product)
+	if err != nil {
+		return update, err
+	}
+
+	return update, nil
+}
+
+func (s *service) UpdateThumbProductService(input UpdateThumbProductInput) (Product, error) {
+	product, err := s.repository.FindById(input.ID)
+	if err != nil {
+		return product, err
+	}
+
+	product.Thumbnail = input.Thumbnail
 
 	update, err := s.repository.Update(product)
 	if err != nil {
@@ -413,10 +475,12 @@ func (s *service) ProductPaginationService(url string, pagination *helper.Pagina
 	operationResult, totalPages := s.repository.ProductPagination(pagination)
 
 	if operationResult.Error != nil {
-		return helper.ResponsePagination{Success: false, Message: operationResult.Error.Error()}
+		return helper.ResponsePagination{Success: false, Message: operationResult.Error.Error(), Data: totalPages}
 	}
 
 	var data = operationResult.Result.(*helper.Pagination)
+	//var data = helper.Pagination{operationResult.Result}
+	//return helper.ResponsePagination{Success: false, Data: data}
 
 	// get current url path
 	urlPath := url
