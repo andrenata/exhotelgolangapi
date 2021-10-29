@@ -216,6 +216,25 @@ func (h *productHandler) GetAllProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *productHandler) SearchProductHanlder(c *gin.Context) {
+
+	var input product.SearchInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+		response := helper.APIResponse("Validation Pagination Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	products, total := h.productService.SearchProductService(input)
+
+	formatter := product.FormatProducts(products)
+	response := helper.APIPagination("Search All Products", http.StatusOK, "success", total, formatter)
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *productHandler) GetProductByCateg(c *gin.Context) {
 	var input product.PaginationProductCategInput
 	err := c.ShouldBindJSON(&input)

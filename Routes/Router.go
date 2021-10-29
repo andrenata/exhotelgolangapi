@@ -114,6 +114,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	// FRONTEND
 	api.POST("/front/products", productHandler.GetAllProduct)
+	api.POST("/front/search", productHandler.SearchProductHanlder)
 	api.POST("/front/products/best", productHandler.GetAllProduct)
 	api.POST("/front/product/categ", productHandler.GetProductByCateg)
 	api.POST("/front/contact", settingHandler.FindByid)

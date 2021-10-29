@@ -36,6 +36,18 @@ type PaginationInput struct {
 	Sort      string `json:"sort"`
 	Direction string `json:"direction"`
 	Active 	int `json:"active"`
+	Stock int `json:"stock"`
+}
+
+type SearchInput struct {
+	Page      int    `json:"page"`
+	Size      int    `json:"size"`
+	Sort      string `json:"sort"`
+	Direction string `json:"direction"`
+	Active 	int `json:"active"`
+	Stock int `json:"stock"`
+	Id int `json:"id"`
+	Search string `json:"search"`
 }
 
 type PaginationProductCategInput struct {
@@ -44,6 +56,7 @@ type PaginationProductCategInput struct {
 	Sort      string `json:"sort"`
 	Direction string `json:"direction"`
 	Slug string `json:"slug"`
+	Stock int `json:"stock"`
 }
 
 type UpdateThumbProductInput struct {
