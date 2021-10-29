@@ -20,14 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a7a054ca-db51-4e15-82e5-d99f15da3ae1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Routes/Router.go" beforeDir="false" afterPath="$PROJECT_DIR$/Routes/Router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/handler/product.go" beforeDir="false" afterPath="$PROJECT_DIR$/handler/product.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/input.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/input.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/product/service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
