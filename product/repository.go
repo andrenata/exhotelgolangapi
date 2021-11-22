@@ -133,9 +133,15 @@ func (r *repository) FrontFindProductByCateg(input PaginationProductCategInput) 
 	totalRows := 0
 	total := int64(totalRows)
 
+	page := input.Page
+
+	if page == 0 {
+		page = 1
+	}
+
 	//query
-	offset := input.Page * input.Size
-	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort+" "+input.Direction)
+	offset := (page - 1) * input.Size
+	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort + " " + input.Direction)
 	if input.Stock == 1 {
 		find = find.Joins("JOIN category_relations ON products.id = category_relations.product_id").
 			Joins("JOIN categories ON category_relations.category_id = categories.id").
@@ -190,9 +196,15 @@ func (r *repository) FindAll(input PaginationInput) ([]Product, int64) {
 	totalRows := 0
 	total := int64(totalRows)
 
+	page := input.Page
+
+	if page == 0 {
+		page = 1
+	}
+
 	//query
-	offset := input.Page * input.Size
-	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort+" "+input.Direction)
+	offset := (page - 1) * input.Size
+	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort + " " + input.Direction)
 
 	if input.Active == 1 {
 		if input.Stock == 1 {
@@ -247,9 +259,15 @@ func (r *repository) SearchAll(input SearchInput) ([]Product, int64) {
 	totalRows := 0
 	total := int64(totalRows)
 
+	page := input.Page
+
+	if page == 0 {
+		page = 1
+	}
+
 	//query
-	offset := input.Page * input.Size
-	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort+" "+input.Direction)
+	offset := (page - 1) * input.Size
+	find := r.db.Limit(input.Size).Offset(offset).Order(input.Sort + " " + input.Direction)
 
 	if input.Id > 0 {
 		find = find.Where("active = ?", 1).
@@ -266,7 +284,6 @@ func (r *repository) SearchAll(input SearchInput) ([]Product, int64) {
 			Or("description LIKE ?", "%"+input.Search+"%").
 			Find(&products)
 	}
-
 
 	if input.Active == 0 {
 		find = find.Find(&products)
@@ -295,7 +312,6 @@ func (r *repository) SearchAll(input SearchInput) ([]Product, int64) {
 			Find(&products).Count(&total).Error
 	}
 
-
 	if input.Active == 0 {
 		err = r.db.Find(&products).Count(&total).Error
 	}
@@ -317,8 +333,6 @@ func (r *repository) FindAllBest() ([]Product, error) {
 
 	return products, nil
 }
-
-
 
 func (r *repository) FindProductByCategory(slug string) (Product, error) {
 	var product Product
